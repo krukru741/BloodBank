@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">BloodBank</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string-array name="bloodgroups">
+        <item>Select your blood group</item>
+        <item>A+</item>
+        <item>A-</item>
+        <item>B+</item>
+        <item>B-</item>
+        <item>AB+</item>
+        <item>AB-</item>
+        <item>O+</item>
+        <item>0-</item>
+
+    </string-array>
+
+    <array name="gender">
+        <item>Select your Gender</item>
+        <item>Male</item>
+        <item>Female</item>
+    </array>
+
+    <string name="aboutus">This is a demo projects on blood donation and collecting blood . Our Team Members are: \n
+                1. Noel Cedeňo\n
+                2. Alben Gacayan \n
+                3. Rogelio Niadas \n
+                4. Lorenelia Laput \n
+                5. Raymond Balucos \n
+    </string>
+
+</resources>
