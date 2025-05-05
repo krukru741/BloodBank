@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/back">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -13,7 +14,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="#990f10"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -29,58 +30,176 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Donation Status Card -->
+            <!-- Quick Status Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                android:background="#fff">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Donation Status"
-                        android:textSize="20sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:id="@+id/lastDonationDateText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Last Donation: Never"/>
-
-                    <TextView
-                        android:id="@+id/totalDonationsText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Total Donations: 0"/>
-
-                    <TextView
-                        android:id="@+id/eligibilityStatusText"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:text="Quick Status"
+                        android:textSize="18sp"
                         android:textStyle="bold"
-                        android:text="Eligibility Status: Eligible"/>
+                        android:textColor="#990f10"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="16dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/eligibilityStatusText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Eligible"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:textColor="#990f10"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Status"
+                                android:textSize="14sp"
+                                android:textColor="#990f10"/>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#990f10"
+                            android:layout_marginHorizontal="8dp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/daysUntilEligibleText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:textColor="#990f10"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Days Until Eligible"
+                                android:textSize="14sp"
+                                android:textColor="#990f10"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Donation History Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                android:background="#fff">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
 
                     <TextView
-                        android:id="@+id/daysUntilEligibleText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Days until eligible: 0"/>
+                        android:text="Donation History"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#990f10"/>
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="16dp">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/totalDonationsText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:textColor="#990f10"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Total Donations"
+                                android:textSize="14sp"
+                                android:textColor="#990f10"/>
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="#990f10"
+                            android:layout_marginHorizontal="8dp"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical"
+                            android:gravity="center">
+
+                            <TextView
+                                android:id="@+id/lastDonationDateText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Never"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:textColor="#990f10"/>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Last Donation"
+                                android:textSize="14sp"
+                                android:textColor="#990f10"/>
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Health Metrics Card -->
@@ -88,34 +207,59 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                android:background="#fff">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Health Metrics"
-                        android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#990f10"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Update your health metrics to check eligibility"
+                        android:textSize="14sp"
+                        android:textColor="#990f10"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="12dp"/>
+
+                    <!-- Basic Health Metrics -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Basic Health Metrics"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#990f10"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"/>
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:boxStrokeColor="#990f10">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/hemoglobinInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Hemoglobin Level (g/dL)"
-                            android:inputType="numberDecimal"/>
+                            android:inputType="numberDecimal"
+                            android:textColor="#000000"
+                            android:textColorHint="#990f10"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -130,14 +274,17 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginEnd="8dp"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:boxStrokeColor="#990f10">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/systolicInput"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:hint="Systolic (mmHg)"
-                                android:inputType="number"/>
+                                android:inputType="number"
+                                android:textColor="#000000"
+                                android:textColorHint="#990f10"/>
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -145,14 +292,62 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:boxStrokeColor="#990f10">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/diastolicInput"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:hint="Diastolic (mmHg)"
-                                android:inputType="number"/>
+                                android:inputType="number"
+                                android:textColor="#000000"
+                                android:textColorHint="#990f10"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="8dp">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:boxStrokeColor="#990f10">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/weightInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Weight (kg)"
+                                android:inputType="numberDecimal"
+                                android:textColor="#000000"
+                                android:textColorHint="#990f10"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            app:boxStrokeColor="#990f10">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/temperatureInput"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="Temperature (°C)"
+                                android:inputType="numberDecimal"
+                                android:textColor="#000000"
+                                android:textColorHint="#990f10"/>
 
                         </com.google.android.material.textfield.TextInputLayout>
 
@@ -162,16 +357,70 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        app:boxStrokeColor="#990f10">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/weightInput"
+                            android:id="@+id/pulseRateInput"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Weight (kg)"
-                            android:inputType="numberDecimal"/>
+                            android:hint="Pulse Rate (bpm)"
+                            android:inputType="number"
+                            android:textColor="#000000"
+                            android:textColorHint="#990f10"/>
 
                     </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Health Questions -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Health Questions"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#990f10"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/feelingWellCheckbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="I am feeling well today"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="8dp"/>
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/medicationCheckbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="I have taken medication in the last 24 hours"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="8dp"/>
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/travelCheckbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="I have traveled outside the country in the last 3 months"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="8dp"/>
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/surgeryCheckbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="I have had surgery in the last 6 months"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="8dp"/>
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/pregnancyCheckbox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="I am pregnant or have been pregnant in the last 6 months"
+                        android:textColor="@color/black"
+                        android:layout_marginTop="8dp"/>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/updateHealthMetricsButton"
@@ -179,38 +428,42 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="Update Health Metrics"
-                        app:cornerRadius="8dp"/>
+                        android:textColor="#ffffff"
+                        app:cornerRadius="8dp"
+                        app:backgroundTint="#990f10"/>
 
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
             <!-- Health Status Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="4dp">
+                app:cardCornerRadius="12dp"
+                app:cardElevation="6dp"
+                android:background="#fff">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Health Status"
-                        android:textSize="20sp"
-                        android:textStyle="bold"/>
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="#990f10"/>
 
                     <TextView
                         android:id="@+id/lastUpdatedText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="Last Updated: Never"/>
+                        android:text="Last Updated: Never"
+                        android:textColor="#990f10"/>
 
                     <TextView
                         android:id="@+id/healthStatusText"
@@ -218,21 +471,21 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textStyle="bold"
-                        android:text="Current Status: Eligible"/>
+                        android:text="Current Status: Eligible"
+                        android:textColor="#990f10"/>
 
                     <TextView
                         android:id="@+id/deferralReasonText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:visibility="gone"/>
+                        android:visibility="gone"
+                        android:textColor="#990f10"/>
 
                 </LinearLayout>
-
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout> 

@@ -15,7 +15,7 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.bloodbank.EmergencyRequestDetailsActivity;
 import com.example.bloodbank.R;
-import com.example.bloodbank.DonationSchedulingActivity;
+import com.example.bloodbank.ScheduleDonationActivity;
 
 public class NotificationHelper {
         private static final String CHANNEL_ID = "emergency_channel";
@@ -125,7 +125,7 @@ public class NotificationHelper {
 
         public static void sendAppointmentReminder(Context context, String title, String message,
                         String appointmentId) {
-                Intent intent = new Intent(context, DonationSchedulingActivity.class);
+                Intent intent = new Intent(context, ScheduleDonationActivity.class);
                 intent.putExtra("appointmentId", appointmentId);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -153,7 +153,7 @@ public class NotificationHelper {
         }
 
         public static void sendEligibilityNotification(Context context, String title, String message) {
-                Intent intent = new Intent(context, DonationSchedulingActivity.class);
+                Intent intent = new Intent(context, ScheduleDonationActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                 PendingIntent pendingIntent = PendingIntent.getActivity(

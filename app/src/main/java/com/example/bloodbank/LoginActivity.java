@@ -3,38 +3,31 @@ package com.example.bloodbank;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.nio.charset.StandardCharsets;
-
 public class LoginActivity extends AppCompatActivity {
 
     private TextView backButton;
-
+    private TextInputLayout emailLayout, passwordLayout;
     private TextInputEditText loginEmail, loginPassword;
     private TextView forgotPassword;
-    private Button  loginButton;
-
-    private ProgressDialog loader;
-
+    private MaterialButton loginButton;
+    private MaterialAlertDialogBuilder progressDialog;
     private FirebaseAuth mAuth;
-
     private FirebaseAuth.AuthStateListener authStateListener;
 
     @Override
@@ -42,85 +35,100 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        mAuth = FirebaseAuth.getInstance();
+        initializeViews();
+        setupFirebaseAuth();
+        setupClickListeners();
+    }
 
-        authStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = mAuth.getCurrentUser();
-                if (user !=null){
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-
-            }
-        };
-
+    private void initializeViews() {
         backButton = findViewById(R.id.backButton);
+        emailLayout = findViewById(R.id.emailLayout);
+        passwordLayout = findViewById(R.id.passwordLayout);
         loginEmail = findViewById(R.id.loginEmail);
         loginPassword = findViewById(R.id.loginPassword);
         forgotPassword = findViewById(R.id.forgotPassword);
         loginButton = findViewById(R.id.loginButton);
+        progressDialog = new MaterialAlertDialogBuilder(this)
+                .setMessage("Logging in...")
+                .setCancelable(false);
+    }
 
-        loader = new ProgressDialog(this);
+    private void setupFirebaseAuth() {
         mAuth = FirebaseAuth.getInstance();
-
-        backButton.setOnClickListener(new View.OnClickListener() {
+        authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(LoginActivity.this, SelectRegistrationActivity.class);
-                startActivity(intent);
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = mAuth.getCurrentUser();
+                if (user != null) {
+                    navigateToMainActivity();
+                }
             }
+        };
+    }
+
+    private void setupClickListeners() {
+        backButton.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, SelectRegistrationActivity.class);
+            startActivity(intent);
         });
-        forgotPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this,ForgotPasswordActivity.class);
-                startActivity(intent);
-            }
+
+        forgotPassword.setOnClickListener(v -> {
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
         });
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                final String email = loginEmail.getText().toString().trim();
-                final String password = loginPassword.getText().toString().trim();
+        loginButton.setOnClickListener(v -> {
+            String email = loginEmail.getText().toString().trim();
+            String password = loginPassword.getText().toString().trim();
 
-                if (TextUtils.isEmpty(email)){
-                    loginEmail.setError("Email is required!");
-                }
-                if (TextUtils.isEmpty(password)) {
-                    loginPassword.setError("Password is required!");
-                }
-                else {
-                    loader.setMessage("log in progress");
-                    loader.setCanceledOnTouchOutside(false);
-                    loader.show();
-
-                    mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()){
-                                Toast.makeText(LoginActivity.this, "Log in successful", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }else {
-                                Toast.makeText(LoginActivity.this, task.getException().toString(), Toast.LENGTH_SHORT).show();
-                            }
-
-                            loader.dismiss();
-
-                        }
-                    });
-                }
-
+            if (validateInputs(email, password)) {
+                performLogin(email, password);
             }
         });
     }
 
+    private boolean validateInputs(String email, String password) {
+        boolean isValid = true;
 
+        if (TextUtils.isEmpty(email)) {
+            emailLayout.setError("Email is required");
+            isValid = false;
+        } else {
+            emailLayout.setError(null);
+        }
+
+        if (TextUtils.isEmpty(password)) {
+            passwordLayout.setError("Password is required");
+            isValid = false;
+        } else {
+            passwordLayout.setError(null);
+        }
+
+        return isValid;
+    }
+
+    private void performLogin(String email, String password) {
+        progressDialog.show();
+
+        mAuth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    progressDialog.create().dismiss();
+                    if (task.isSuccessful()) {
+                        Toast.makeText(LoginActivity.this, "Login successful", Toast.LENGTH_SHORT).show();
+                        navigateToMainActivity();
+                    } else {
+                        String errorMessage = task.getException() != null ? 
+                            task.getException().getMessage() : "Login failed";
+                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void navigateToMainActivity() {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
+    }
 
     @Override
     protected void onStart() {

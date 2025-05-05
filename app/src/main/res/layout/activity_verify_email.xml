@@ -1,60 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="20dp"
     android:background="@drawable/back"
+    android:padding="24dp"
     tools:context=".VerifyEmailActivity">
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        app:cardCornerRadius="10dp"
-        app:cardElevation="10dp"
+        android:layout_marginTop="40dp"
         android:background="#fff"
-        android:elevation="10dp">
+        android:elevation="12dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="12dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:orientation="vertical">
+            android:padding="32dp">
 
             <ImageView
-
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_gravity="center"
-                android:layout_marginTop="0dp"
-                android:src="@drawable/logo" />
+                android:id="@+id/logo"
+                android:layout_width="140dp"
+                android:layout_height="140dp"
+                android:src="@drawable/logo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/verifyMsg"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
+                android:layout_marginTop="24dp"
                 android:text="Email Not Verified!"
-                android:textColor="#000000"
-                android:textSize="30sp"
-                android:textStyle="bold" />
-            <Button
+                android:textColor="#000"
+                android:textSize="24sp"
+                android:letterSpacing="0.02"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/logo" />
+
+            <TextView
+                android:id="@+id/verifySubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Please verify your email to continue"
+                android:textColor="#666666"
+                android:textSize="16sp"
+                android:letterSpacing="0.01"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/verifyMsg" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/verifyBtn"
+                style="@style/Widget.MaterialComponents.Button"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="32dp"
                 android:text="VERIFY NOW"
                 android:textAllCaps="false"
-                android:layout_marginTop="30dp"
-                android:layout_marginBottom="20dp"
-                android:layout_gravity="center"
-                android:textColor="#fff"
-                android:textSize="25dp"
-                android:background="@drawable/buttons_background"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:letterSpacing="0.02"
+                app:backgroundTint="#990f10"
+                app:cornerRadius="12dp"
+                app:rippleColor="#33ffffff"
+                app:layout_constraintTop_toBottomOf="@id/verifySubtitle" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

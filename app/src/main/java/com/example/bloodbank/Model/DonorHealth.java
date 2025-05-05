@@ -10,6 +10,13 @@ public class DonorHealth {
     private int bloodPressureSystolic;
     private int bloodPressureDiastolic;
     private double weight;
+    private double temperature;
+    private int pulseRate;
+    private boolean feelingWell;
+    private boolean takenMedication;
+    private boolean traveled;
+    private boolean hadSurgery;
+    private boolean pregnant;
     private String lastHealthStatus; // ELIGIBLE, INELIGIBLE, TEMPORARY_DEFERRAL
     private String deferralReason;
     private long lastUpdated;
@@ -19,6 +26,11 @@ public class DonorHealth {
         // Required empty constructor for Firebase
         this.lastHealthStatus = "Not Evaluated";
         this.totalDonations = 0;
+        this.feelingWell = true;
+        this.takenMedication = false;
+        this.traveled = false;
+        this.hadSurgery = false;
+        this.pregnant = false;
     }
 
     public DonorHealth(String donorId) {
@@ -28,6 +40,11 @@ public class DonorHealth {
         this.totalDonations = 0;
         this.lastHealthStatus = "ELIGIBLE";
         this.lastUpdated = new Date().getTime();
+        this.feelingWell = true;
+        this.takenMedication = false;
+        this.traveled = false;
+        this.hadSurgery = false;
+        this.pregnant = false;
     }
 
     // Getters and Setters
@@ -91,6 +108,69 @@ public class DonorHealth {
 
     public void setWeight(double weight) {
         this.weight = weight;
+        this.lastUpdated = new Date().getTime();
+    }
+
+    public double getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(double temperature) {
+        this.temperature = temperature;
+        this.lastUpdated = new Date().getTime();
+    }
+
+    public int getPulseRate() {
+        return pulseRate;
+    }
+
+    public void setPulseRate(int pulseRate) {
+        this.pulseRate = pulseRate;
+        this.lastUpdated = new Date().getTime();
+    }
+
+    public boolean isFeelingWell() {
+        return feelingWell;
+    }
+
+    public void setFeelingWell(boolean feelingWell) {
+        this.feelingWell = feelingWell;
+        this.lastUpdated = new Date().getTime();
+    }
+
+    public boolean hasTakenMedication() {
+        return takenMedication;
+    }
+
+    public void setTakenMedication(boolean takenMedication) {
+        this.takenMedication = takenMedication;
+        this.lastUpdated = new Date().getTime();
+    }
+
+    public boolean hasTraveled() {
+        return traveled;
+    }
+
+    public void setTraveled(boolean traveled) {
+        this.traveled = traveled;
+        this.lastUpdated = new Date().getTime();
+    }
+
+    public boolean hasHadSurgery() {
+        return hadSurgery;
+    }
+
+    public void setHadSurgery(boolean hadSurgery) {
+        this.hadSurgery = hadSurgery;
+        this.lastUpdated = new Date().getTime();
+    }
+
+    public boolean isPregnant() {
+        return pregnant;
+    }
+
+    public void setPregnant(boolean pregnant) {
+        this.pregnant = pregnant;
         this.lastUpdated = new Date().getTime();
     }
 

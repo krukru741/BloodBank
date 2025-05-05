@@ -1,47 +1,51 @@
 package com.example.bloodbank.Model;
 
 public class Notification {
-    String receiverId, senderId, text, date;
+    private String userId;
+    private String message;
+    private String time;
+    private boolean isRead;
 
     public Notification() {
+        // Default constructor required for Firebase
     }
 
-    public Notification(String receiverId, String senderId, String text, String date) {
-        this.receiverId = receiverId;
-        this.senderId = senderId;
-        this.text = text;
-        this.date = date;
+    public Notification(String userId, String message, String time, boolean isRead) {
+        this.userId = userId;
+        this.message = message;
+        this.time = time;
+        this.isRead = isRead;
     }
 
-    public String getReceiverId() {
-        return receiverId;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setReceiverId(String receiverId) {
-        this.receiverId = receiverId;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public String getMessage() {
+        return message;
     }
 
-    public void setSenderId(String senderId) {
-        this.senderId = senderId;
+    public void setMessage(String message) {
+        this.message = message;
     }
 
-    public String getText() {
-        return text;
+    public String getTime() {
+        return time;
     }
 
-    public void setText(String text) {
-        this.text = text;
+    public void setTime(String time) {
+        this.time = time;
     }
 
-    public String getDate() {
-        return date;
+    public boolean isRead() {
+        return isRead;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setRead(boolean read) {
+        isRead = read;
     }
 }

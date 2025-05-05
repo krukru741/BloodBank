@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.appcompat.widget.Toolbar;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -33,6 +34,9 @@ import com.example.bloodbank.Model.User;
 import com.example.bloodbank.Util.LocationHelper;
 import com.example.bloodbank.Util.NotificationHelper;
 import com.google.firebase.database.ServerValue;
+import com.google.android.material.textfield.TextInputEditText;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -41,20 +45,32 @@ import java.util.Locale;
 
 public class EmergencyRequestActivity extends AppCompatActivity {
 
-    private EditText hospitalNameEditText, hospitalContactEditText, unitsNeededEditText,
-            emergencyDetailsEditText, emergencyContactNameEditText,
-            emergencyContactPhoneEditText;
-    private Spinner bloodGroupSpinner;
-    private RadioGroup priorityRadioGroup;
-    private Button submitEmergencyRequest;
+    private TextInputEditText hospitalNameInput, hospitalAddressInput, hospitalContactInput,
+            patientNameInput, unitsNeededInput, emergencyDetailsInput;
+    private AutoCompleteTextView bloodGroupInput, priorityLevelInput;
+    private DatabaseReference emergencyRequestsRef;
     private FusedLocationProviderClient fusedLocationClient;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int SMS_PERMISSION_REQUEST_CODE = 2;
+    private static final String[] BLOOD_GROUPS = {
+        "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"
+    };
+    private static final String[] PRIORITY_LEVELS = {
+        "Normal", "Urgent", "Critical"
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_emergency_request);
+
+        // Setup toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
         // Initialize notification channel
         NotificationHelper.createNotificationChannel(this);
@@ -62,16 +78,46 @@ public class EmergencyRequestActivity extends AppCompatActivity {
         // Subscribe to emergency notifications topic
         FirebaseMessaging.getInstance().subscribeToTopic("emergency_requests");
 
+        // Initialize Firebase
+        emergencyRequestsRef = FirebaseDatabase.getInstance().getReference("emergency_requests");
+
         // Initialize views
-        hospitalNameEditText = findViewById(R.id.hospitalNameEditText);
-        hospitalContactEditText = findViewById(R.id.hospitalContactEditText);
-        unitsNeededEditText = findViewById(R.id.unitsNeededEditText);
-        emergencyDetailsEditText = findViewById(R.id.emergencyDetailsEditText);
-        emergencyContactNameEditText = findViewById(R.id.emergencyContactNameEditText);
-        emergencyContactPhoneEditText = findViewById(R.id.emergencyContactPhoneEditText);
-        bloodGroupSpinner = findViewById(R.id.emergencyBloodGroupSpinner);
-        priorityRadioGroup = findViewById(R.id.priorityRadioGroup);
-        submitEmergencyRequest = findViewById(R.id.submitEmergencyRequest);
+        hospitalNameInput = findViewById(R.id.hospitalNameInput);
+        hospitalAddressInput = findViewById(R.id.hospitalAddressInput);
+        hospitalContactInput = findViewById(R.id.hospitalContactInput);
+        patientNameInput = findViewById(R.id.patientNameInput);
+        bloodGroupInput = findViewById(R.id.bloodGroupInput);
+        priorityLevelInput = findViewById(R.id.priorityLevelInput);
+        unitsNeededInput = findViewById(R.id.unitsNeededInput);
+        emergencyDetailsInput = findViewById(R.id.emergencyDetailsInput);
+
+        // Setup blood group spinner
+        ArrayAdapter<String> bloodGroupAdapter = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            BLOOD_GROUPS
+        );
+        bloodGroupInput.setAdapter(bloodGroupAdapter);
+        bloodGroupInput.setKeyListener(null); // Disable keyboard input
+        bloodGroupInput.setOnClickListener(v -> bloodGroupInput.showDropDown());
+        bloodGroupInput.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedBloodGroup = BLOOD_GROUPS[position];
+            bloodGroupInput.setText(selectedBloodGroup, false);
+        });
+
+        // Setup priority level spinner
+        ArrayAdapter<String> priorityAdapter = new ArrayAdapter<>(
+            this,
+            android.R.layout.simple_spinner_dropdown_item,
+            PRIORITY_LEVELS
+        );
+        priorityLevelInput.setAdapter(priorityAdapter);
+        priorityLevelInput.setKeyListener(null); // Disable keyboard input
+        priorityLevelInput.setOnClickListener(v -> priorityLevelInput.showDropDown());
+        priorityLevelInput.setOnItemClickListener((parent, view, position, id) -> {
+            String selectedPriority = PRIORITY_LEVELS[position];
+            priorityLevelInput.setText(selectedPriority, false);
+        });
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -83,7 +129,8 @@ public class EmergencyRequestActivity extends AppCompatActivity {
                     SMS_PERMISSION_REQUEST_CODE);
         }
 
-        submitEmergencyRequest.setOnClickListener(new View.OnClickListener() {
+        // Set up submit button
+        findViewById(R.id.submitRequestButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 submitEmergencyRequest();
@@ -92,34 +139,21 @@ public class EmergencyRequestActivity extends AppCompatActivity {
     }
 
     private void submitEmergencyRequest() {
-        String hospitalName = hospitalNameEditText.getText().toString().trim();
-        String hospitalContact = hospitalContactEditText.getText().toString().trim();
-        String unitsNeeded = unitsNeededEditText.getText().toString().trim();
-        String emergencyDetails = emergencyDetailsEditText.getText().toString().trim();
-        String emergencyContactName = emergencyContactNameEditText.getText().toString().trim();
-        String emergencyContactPhone = emergencyContactPhoneEditText.getText().toString().trim();
-        String bloodGroup = bloodGroupSpinner.getSelectedItem().toString();
-
-        // Get priority level
-        final int priorityLevel;
-        final String priorityDescription;
-        int selectedPriorityId = priorityRadioGroup.getCheckedRadioButtonId();
-        if (selectedPriorityId == R.id.priorityUrgent) {
-            priorityLevel = 2;
-            priorityDescription = "Urgent";
-        } else if (selectedPriorityId == R.id.priorityCritical) {
-            priorityLevel = 3;
-            priorityDescription = "Critical";
-        } else {
-            priorityLevel = 1;
-            priorityDescription = "Normal";
-        }
+        // Get input values
+        String hospitalName = hospitalNameInput.getText().toString().trim();
+        String hospitalAddress = hospitalAddressInput.getText().toString().trim();
+        String hospitalContact = hospitalContactInput.getText().toString().trim();
+        String patientName = patientNameInput.getText().toString().trim();
+        String bloodGroup = bloodGroupInput.getText().toString().trim();
+        String priorityLevel = priorityLevelInput.getText().toString().trim();
+        String unitsNeeded = unitsNeededInput.getText().toString().trim();
+        String emergencyDetails = emergencyDetailsInput.getText().toString().trim();
 
         // Validate inputs
-        if (hospitalName.isEmpty() || hospitalContact.isEmpty() || unitsNeeded.isEmpty() ||
-                emergencyDetails.isEmpty() || emergencyContactName.isEmpty() ||
-                emergencyContactPhone.isEmpty() || bloodGroup.equals("Select Blood Group")) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+        if (hospitalName.isEmpty() || hospitalAddress.isEmpty() || hospitalContact.isEmpty() ||
+                patientName.isEmpty() || bloodGroup.isEmpty() || priorityLevel.isEmpty() ||
+                unitsNeeded.isEmpty() || emergencyDetails.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -139,46 +173,39 @@ public class EmergencyRequestActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful() && task.getResult() != null) {
                             Location location = task.getResult();
-                            createEmergencyRequest(hospitalName, hospitalContact, unitsNeeded,
-                                    emergencyDetails, bloodGroup, location,
-                                    emergencyContactName, emergencyContactPhone,
-                                    priorityLevel, priorityDescription);
+                            createEmergencyRequest(hospitalName, hospitalAddress, hospitalContact,
+                                    patientName, bloodGroup, unitsNeeded, emergencyDetails, location);
                         } else {
-                            createEmergencyRequest(hospitalName, hospitalContact, unitsNeeded,
-                                    emergencyDetails, bloodGroup, null,
-                                    emergencyContactName, emergencyContactPhone,
-                                    priorityLevel, priorityDescription);
+                            createEmergencyRequest(hospitalName, hospitalAddress, hospitalContact,
+                                    patientName, bloodGroup, unitsNeeded, emergencyDetails, null);
                         }
                     }
                 });
     }
 
-    private void createEmergencyRequest(String hospitalName, String hospitalContact,
-            String unitsNeeded, String emergencyDetails,
-            String bloodGroup, Location location,
-            String emergencyContactName, String emergencyContactPhone,
-            int priorityLevel, String priorityDescription) {
+    private void createEmergencyRequest(String hospitalName, String hospitalAddress, String hospitalContact,
+            String patientName, String bloodGroup, String unitsNeeded, String emergencyDetails,
+            Location location) {
         DatabaseReference emergencyRef = FirebaseDatabase.getInstance().getReference()
                 .child("emergency_requests");
         String requestId = emergencyRef.push().getKey();
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        String currentDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss",
-                Locale.getDefault()).format(new Date());
+        long currentTimestamp = System.currentTimeMillis();
 
         HashMap<String, Object> emergencyInfo = new HashMap<>();
         emergencyInfo.put("requestId", requestId);
         emergencyInfo.put("userId", userId);
         emergencyInfo.put("hospitalName", hospitalName);
-        emergencyInfo.put("hospitalContactNumber", hospitalContact);
+        emergencyInfo.put("hospitalAddress", hospitalAddress);
+        emergencyInfo.put("hospitalContact", hospitalContact);
+        emergencyInfo.put("patientName", patientName);
+        emergencyInfo.put("bloodGroup", bloodGroup);
+        emergencyInfo.put("priorityLevel", priorityLevelInput.getText().toString());
         emergencyInfo.put("unitsNeeded", unitsNeeded);
         emergencyInfo.put("emergencyDetails", emergencyDetails);
-        emergencyInfo.put("bloodGroup", bloodGroup);
         emergencyInfo.put("status", "ACTIVE");
-        emergencyInfo.put("timestamp", currentDate);
-        emergencyInfo.put("emergencyContactName", emergencyContactName);
-        emergencyInfo.put("emergencyContactPhone", emergencyContactPhone);
-        emergencyInfo.put("priorityLevel", priorityLevel);
-        emergencyInfo.put("priorityDescription", priorityDescription);
+        emergencyInfo.put("timestamp", currentTimestamp);
+        emergencyInfo.put("requestedBy", userId);
 
         if (location != null) {
             emergencyInfo.put("latitude", location.getLatitude());
@@ -191,15 +218,18 @@ public class EmergencyRequestActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             // Send SMS to emergency contact
-                            sendEmergencySMS(emergencyContactPhone, hospitalName, bloodGroup);
+                            sendEmergencySMS(hospitalContact, hospitalName, bloodGroup);
 
                             Toast.makeText(EmergencyRequestActivity.this,
-                                    "Emergency request created successfully", Toast.LENGTH_SHORT).show();
-                            notifyNearbyDonors(requestId, bloodGroup, location, priorityLevel);
+                                    "Emergency request submitted successfully", Toast.LENGTH_SHORT).show();
+                            notifyNearbyDonors(requestId, bloodGroup, location);
                             finish();
                         } else {
+                            String errorMessage = task.getException() != null ? 
+                                task.getException().getMessage() : "Unknown error";
                             Toast.makeText(EmergencyRequestActivity.this,
-                                    "Failed to create emergency request", Toast.LENGTH_SHORT).show();
+                                    "Failed to submit request: " + errorMessage, 
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -220,10 +250,9 @@ public class EmergencyRequestActivity extends AppCompatActivity {
         }
     }
 
-    private void notifyNearbyDonors(String requestId, String bloodGroup, Location location,
-            int priorityLevel) {
+    private void notifyNearbyDonors(String requestId, String bloodGroup, Location location) {
         if (location == null) {
-            notifyAllDonors(requestId, bloodGroup, priorityLevel);
+            notifyAllDonors(requestId, bloodGroup);
             return;
         }
 
@@ -235,7 +264,7 @@ public class EmergencyRequestActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot donorSnapshot : snapshot.getChildren()) {
                     User donor = donorSnapshot.getValue(User.class);
-                    if (donor != null && isCompatibleBloodGroup(bloodGroup, donor.getBloodgroup())) {
+                    if (donor != null && isCompatibleBloodGroup(bloodGroup, donor.getBloodGroup())) {
                         if (donorSnapshot.hasChild("latitude") &&
                                 donorSnapshot.hasChild("longitude")) {
                             double donorLat = Double.parseDouble(
@@ -245,7 +274,7 @@ public class EmergencyRequestActivity extends AppCompatActivity {
 
                             if (LocationHelper.isWithinRange(location.getLatitude(),
                                     location.getLongitude(), donorLat, donorLon)) {
-                                sendNotificationToDonor(donor, requestId, bloodGroup, priorityLevel);
+                                sendNotificationToDonor(donor, requestId, bloodGroup);
                             }
                         }
                     }
@@ -261,7 +290,7 @@ public class EmergencyRequestActivity extends AppCompatActivity {
         });
     }
 
-    private void notifyAllDonors(String requestId, String bloodGroup, int priorityLevel) {
+    private void notifyAllDonors(String requestId, String bloodGroup) {
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference().child("users");
         Query query = usersRef.orderByChild("type").equalTo("donor");
 
@@ -270,8 +299,8 @@ public class EmergencyRequestActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot donorSnapshot : snapshot.getChildren()) {
                     User donor = donorSnapshot.getValue(User.class);
-                    if (donor != null && isCompatibleBloodGroup(bloodGroup, donor.getBloodgroup())) {
-                        sendNotificationToDonor(donor, requestId, bloodGroup, priorityLevel);
+                    if (donor != null && isCompatibleBloodGroup(bloodGroup, donor.getBloodGroup())) {
+                        sendNotificationToDonor(donor, requestId, bloodGroup);
                     }
                 }
             }
@@ -285,14 +314,12 @@ public class EmergencyRequestActivity extends AppCompatActivity {
         });
     }
 
-    private void sendNotificationToDonor(User donor, String requestId, String bloodGroup,
-            int priorityLevel) {
-        String priorityTag = priorityLevel == 3 ? "CRITICAL: " : priorityLevel == 2 ? "URGENT: " : "";
-        String title = priorityTag + "Emergency Blood Request";
+    private void sendNotificationToDonor(User donor, String requestId, String bloodGroup) {
+        String title = "Emergency Blood Request";
         String message = "Urgent need for " + bloodGroup + " blood. Can you help?";
 
-        // Send notification using NotificationHelper with priority
-        NotificationHelper.sendEmergencyNotification(this, title, message, requestId, priorityLevel);
+        // Send notification using NotificationHelper with priority level 3 (Critical)
+        NotificationHelper.sendEmergencyNotification(this, title, message, requestId, 3);
 
         // Store notification in Firebase
         DatabaseReference notificationRef = FirebaseDatabase.getInstance()
@@ -306,7 +333,6 @@ public class EmergencyRequestActivity extends AppCompatActivity {
         notificationData.put("requestId", requestId);
         notificationData.put("timestamp", ServerValue.TIMESTAMP);
         notificationData.put("read", false);
-        notificationData.put("priorityLevel", priorityLevel);
 
         notificationRef.setValue(notificationData);
     }
@@ -335,5 +361,11 @@ public class EmergencyRequestActivity extends AppCompatActivity {
             default:
                 return false;
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

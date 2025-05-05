@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary brand color -->
+    <color name="primary">#B71C1C</color>
+    <color name="primary_dark">#7F0000</color>
+    <color name="primary_light">#F05545</color>
+
+    <!-- Secondary brand color -->
+    <color name="accent">#FF8A80</color>
+    <color name="accent_dark">#C75B4F</color>
+
+    <!-- Material Design colors -->
+    <color name="purple_500">#9C27B0</color>
+    <color name="purple_700">#7B1FA2</color>
+    <color name="teal_200">#80DEEA</color>
+    <color name="teal_700">#00796B</color>
+
+    <!-- Basic colors -->
+    <color name="white">#121212</color>
+    <color name="black">#FFFFFF</color>
+    <color name="red">#CF6679</color>
+    <color name="gray">#757575</color>
+    <color name="gray_light">#1E1E1E</color>
+    <color name="gray_dark">#9E9E9E</color>
+</resources> 

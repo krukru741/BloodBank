@@ -2,65 +2,45 @@ package com.example.bloodbank;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
-
-import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.bloodbank.databinding.ActivityForgotPasswordBinding;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     private TextInputEditText forgotPass;
-    private Button loginButton;
-
+    private com.google.android.material.button.MaterialButton loginButton;
     private ProgressDialog loader;
-
     private FirebaseAuth mAuth;
+    private Toolbar toolbar;
 
-    private FirebaseAuth.AuthStateListener authStateListener;
-
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forgot_password);
 
+        // Setup toolbar
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
+        }
+
         mAuth = FirebaseAuth.getInstance();
-
-        authStateListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = mAuth.getCurrentUser();
-                if (user !=null){
-                    Intent intent = new Intent(ForgotPasswordActivity.this, MainActivity.class);
-                    startActivity(intent);
-                    finish();
-                }
-
-            }
-        };
-
         forgotPass = findViewById(R.id.forgotPass);
         loginButton = findViewById(R.id.loginButton);
-
         loader = new ProgressDialog(this);
-        mAuth = FirebaseAuth.getInstance();
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,31 +49,47 @@ public class ForgotPasswordActivity extends AppCompatActivity {
 
                 if (TextUtils.isEmpty(email)) {
                     forgotPass.setError("Email is required!");
-                } else {
-                    loader.setMessage("loading....");
+                    forgotPass.requestFocus();
+                    return;
+                }
+
+                loader.setMessage("Sending password reset email...");
                     loader.setCanceledOnTouchOutside(false);
                     loader.show();
 
-                    mAuth.sendPasswordResetEmail(forgotPass.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                mAuth.sendPasswordResetEmail(email)
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
+                            loader.dismiss();
                             if (task.isSuccessful()) {
+                                Toast.makeText(ForgotPasswordActivity.this, 
+                                    "Password reset email sent. Please check your inbox.", 
+                                    Toast.LENGTH_LONG).show();
                                 startActivity(new Intent(ForgotPasswordActivity.this, LoginActivity.class));
                                 finish();
-                                Toast.makeText(ForgotPasswordActivity.this, "Please Check your Email Address", Toast.LENGTH_SHORT).show();
                             } else {
-                                Toast.makeText(ForgotPasswordActivity.this, "Enter correct email Address", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(ForgotPasswordActivity.this, 
+                                    "Error: " + task.getException().getMessage(), 
+                                    Toast.LENGTH_LONG).show();
                             }
                         }
-                    }).addOnFailureListener(new OnFailureListener() {
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(ForgotPasswordActivity.this, e.getMessage(), Toast.LENGTH_SHORT);
+                            loader.dismiss();
+                            Toast.makeText(ForgotPasswordActivity.this, 
+                                "Error: " + e.getMessage(), 
+                                Toast.LENGTH_LONG).show();
                         }
-
                     });
-                }
             }
         });
+    }
+
+    public void onBackToLoginClick(View view) {
+        startActivity(new Intent(ForgotPasswordActivity.this, LoginActivity.class));
+        finish();
     }
 }

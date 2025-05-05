@@ -37,6 +37,8 @@ public class EmergencyRequestListActivity extends AppCompatActivity {
     private EmergencyRequestAdapter adapter;
 
     private DatabaseReference requestsRef;
+    private DatabaseReference userRef;
+    private String userType;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +46,9 @@ public class EmergencyRequestListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_emergency_request_list);
 
         // Initialize Firebase
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         requestsRef = FirebaseDatabase.getInstance().getReference().child("emergency_requests");
+        userRef = FirebaseDatabase.getInstance().getReference().child("users").child(currentUserId);
 
         // Initialize views
         initializeViews();
@@ -52,8 +56,8 @@ public class EmergencyRequestListActivity extends AppCompatActivity {
         setupRecyclerView();
         setupSwipeRefresh();
 
-        // Load emergency requests
-        loadEmergencyRequests();
+        // Get user type and load appropriate requests
+        getUserTypeAndLoadRequests();
     }
 
     private void initializeViews() {
@@ -78,11 +82,30 @@ public class EmergencyRequestListActivity extends AppCompatActivity {
     }
 
     private void setupSwipeRefresh() {
-        swipeRefreshLayout.setOnRefreshListener(this::loadEmergencyRequests);
-        swipeRefreshLayout.setColorSchemeResources(
-            android.R.color.holo_red_dark,
-            android.R.color.holo_red_light
-        );
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                loadEmergencyRequests();
+            }
+        });
+    }
+
+    private void getUserTypeAndLoadRequests() {
+        userRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    userType = snapshot.child("type").getValue().toString();
+                    loadEmergencyRequests();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(EmergencyRequestListActivity.this, "Error: " + error.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void loadEmergencyRequests() {
@@ -95,18 +118,33 @@ public class EmergencyRequestListActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 requestList.clear();
+                String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                
                 for (DataSnapshot requestSnapshot : snapshot.getChildren()) {
                     EmergencyRequest request = requestSnapshot.getValue(EmergencyRequest.class);
                     if (request != null) {
-                        requestList.add(request);
+                        // For donors: show all requests except their own
+                        // For recipients: show only their own requests
+                        if ("donor".equals(userType)) {
+                            if (!request.getUserId().equals(currentUserId)) {
+                                requestList.add(request);
+                            }
+                        } else if ("recipient".equals(userType)) {
+                            if (request.getUserId().equals(currentUserId)) {
+                                requestList.add(request);
+                            }
+                        }
                     }
                 }
 
                 // Sort by priority (high to low) and timestamp (recent first)
                 Collections.sort(requestList, (r1, r2) -> {
-                    int priorityCompare = Integer.compare(r2.getPriorityLevel(), r1.getPriorityLevel());
+                    // Convert priority strings to numeric values for comparison
+                    int p1 = getPriorityValue(r1.getPriorityLevel());
+                    int p2 = getPriorityValue(r2.getPriorityLevel());
+                    int priorityCompare = Integer.compare(p2, p1);
                     if (priorityCompare != 0) return priorityCompare;
-                    return r2.getTimestamp().compareTo(r1.getTimestamp());
+                    return Long.compare(r2.getTimestamp(), r1.getTimestamp());
                 });
 
                 adapter.updateList(requestList);
@@ -116,12 +154,26 @@ public class EmergencyRequestListActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(EmergencyRequestListActivity.this,
-                        "Failed to load emergency requests", Toast.LENGTH_SHORT).show();
+                Toast.makeText(EmergencyRequestListActivity.this, "Error: " + error.getMessage(),
+                        Toast.LENGTH_SHORT).show();
                 progressBar.setVisibility(View.GONE);
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
+    }
+
+    private int getPriorityValue(String priority) {
+        if (priority == null) return 0;
+        switch (priority.toUpperCase()) {
+            case "CRITICAL":
+                return 3;
+            case "URGENT":
+                return 2;
+            case "NORMAL":
+                return 1;
+            default:
+                return 0;
+        }
     }
 
     @Override

@@ -25,7 +25,6 @@
             android:orientation="vertical">
 
             <ImageView
-
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_gravity="center"
@@ -42,12 +41,11 @@
                 android:textStyle="bold" />
 
             <TextView
-
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:text="Signup to continue"
+                android:text="Register to donate blood"
                 android:textColor="#000000"
                 android:textSize="20sp"/>
 
@@ -67,15 +65,29 @@
                 android:layout_gravity="center"
                 app:civ_border_color="#ff000000"/>
 
+                <!-- Personal Information Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Personal Information"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"/>
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:boxStrokeColor="#000" >
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/registeredFullName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Enter full name"
+                        android:hint="Full Name"
                         android:drawablePadding="10dp"
                         android:textColor="#000"
                         android:textSize="18dp"
@@ -86,16 +98,19 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:boxStrokeColor="#000" >
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/registeredIdNumber"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Enter National ID Number"
+                        android:hint="National ID/Passport Number"
                         android:inputType="number"
                         android:drawablePadding="10dp"
                         android:textColor="#000"
-                        android:textSize="18sp"
+                        android:textSize="18dp"
                         android:textColorHint="#000"
                         android:drawableStart="@drawable/ic_number"/>
                 </com.google.android.material.textfield.TextInputLayout>
@@ -103,64 +118,207 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:boxStrokeColor="#000" >
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/registeredPhoneNumber"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Enter Phone Number"
-                        android:inputType="number"
-                        android:drawablePadding="10dp"
-                        android:textColor="#000"
-                        android:textSize="18sp"
-                        android:textColorHint="#000"
-                        android:drawableStart="@drawable/ic_phone"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:boxStrokeColor="#000" >
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/registeredAddress"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Enter Address"
+                        android:hint="Emergency Contact Number"
+                        android:inputType="phone"
                         android:drawablePadding="10dp"
                         android:textColor="#000"
                         android:textSize="18dp"
                         android:textColorHint="#000"
-                        android:drawableStart="@drawable/ic_place"/>
+                        android:drawableStart="@drawable/ic_phone"/>
                 </com.google.android.material.textfield.TextInputLayout>
-
-                <Spinner
-                    android:gravity="center"
-                    android:layout_gravity="center"
-                    android:id="@+id/gendersSpinner"
-                    android:background="#fff"
-                    android:layout_marginStart="19dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_width="match_parent"
-                    android:entries="@array/gender"
-                    android:layout_height="wrap_content"/>
-
-                <Spinner
-                    android:gravity="center"
-                    android:layout_gravity="center"
-                    android:id="@+id/bloodGroupsSpinner"
-                    android:background="#fff"
-                    android:layout_marginStart="19dp"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:layout_width="match_parent"
-                    android:entries="@array/bloodgroups"
-                    android:layout_height="wrap_content"/>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:boxStrokeColor="#000" >
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/registeredOccupation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Occupation"
+                        android:drawablePadding="10dp"
+                        android:textColor="#000"
+                        android:textSize="18dp"
+                        android:textColorHint="#000"
+                        android:drawableStart="@drawable/ic_work"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/registeredWeight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Weight (kg)"
+                        android:inputType="numberDecimal"
+                        android:drawablePadding="10dp"
+                        android:textColor="#000"
+                        android:textSize="18dp"
+                        android:textColorHint="#000"
+                        android:drawableStart="@drawable/ic_weight"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/registeredHeight"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Height (cm)"
+                        android:inputType="numberDecimal"
+                        android:drawablePadding="10dp"
+                        android:textColor="#000"
+                        android:textSize="18dp"
+                        android:textColorHint="#000"
+                        android:drawableStart="@drawable/ic_height"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/registeredLastDonation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Last Donation Date (if any)"
+                        android:inputType="datetime"
+                        android:drawablePadding="10dp"
+                        android:textColor="#000"
+                        android:textSize="18dp"
+                        android:textColorHint="#000"
+                        android:drawableStart="@drawable/ic_calendar"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/registeredAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Address"
+                        android:drawablePadding="10dp"
+                        android:textColor="#000"
+                        android:textSize="18dp"
+                        android:textColorHint="#000"
+                        android:drawableStart="@drawable/ic_location"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+
+                <!-- Medical Information Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Medical Information"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    app:boxStrokeColor="#000000">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/gendersSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Gender"
+                        android:inputType="none"
+                        android:textSize="18dp"
+                        android:textColor="#000"
+                        android:textColorHint="#000"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                    app:boxStrokeColor="#000000">
+
+                    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/bloodGroupsSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Blood Group"
+                        android:inputType="none"
+                        android:textSize="18dp"
+                        android:textColor="#000"
+                        android:textColorHint="#000"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/registeredDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Select Birth Date"
+                        android:inputType="datetime"
+                        android:drawablePadding="10dp"
+                        android:textColor="#000"
+                        android:textSize="18dp"
+                        android:textColorHint="#000"
+                        android:drawableStart="@drawable/ic_calendar"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Account Information Section -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Account Information"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#000000"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginBottom="16dp"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/registeredEmail"
                         android:layout_width="match_parent"
@@ -177,7 +335,11 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:boxStrokeColor="#000" >
+                    android:layout_marginBottom="16dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#000000"
+                    app:passwordToggleEnabled="true">
+
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/registeredPassword"
                         android:layout_width="match_parent"
@@ -191,26 +353,9 @@
                         android:drawableStart="@drawable/ic_lock"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:boxStrokeColor="#000" >
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/registeredDate"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Select Birth Date"
-                        android:inputType="datetime"
-                        android:drawablePadding="10dp"
-                        android:textColor="#000"
-                        android:textSize="18dp"
-                        android:textColorHint="#000"
-                        android:drawableStart="@drawable/ic_calendar"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
                 <Button
                     android:id="@+id/registerButton"
-                    android:text="Sign Up Now"
+                    android:text="REGISTER"
                     android:textAllCaps="false"
                     android:layout_marginTop="20dp"
                     android:layout_gravity="center"
@@ -231,12 +376,6 @@
                     android:layout_height="wrap_content"/>
 
             </LinearLayout>
-
         </LinearLayout>
-
-
     </androidx.cardview.widget.CardView>
-
-
-
 </ScrollView>

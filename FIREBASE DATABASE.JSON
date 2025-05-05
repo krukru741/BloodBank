@@ -1,0 +1,183 @@
+{
+    "rules": {
+      "users": {
+        ".read": "auth != null",
+        "$uid": {
+          ".write": "auth != null && auth.uid == $uid",
+          "profile": {
+            "id": { ".validate": "newData.isString()" },
+            "name": { ".validate": "newData.isString()" },
+            "email": { ".validate": "newData.isString()" },
+            "phoneNumber": { ".validate": "newData.isString()" },
+            "type": { ".validate": "newData.isString()" },
+            "search": { ".validate": "newData.isString()" },
+            "bloodGroup": { ".validate": "newData.isString()" },
+            "gender": { ".validate": "newData.isString()" },
+            "profilePictureUrl": { ".validate": "newData.isString()" },
+            "occupation": { ".validate": "newData.isString()" },
+            "weight": { ".validate": "newData.isNumber()" },
+            "height": { ".validate": "newData.isNumber()" },
+            "lastDonationDate": { ".validate": "newData.isString()" },
+            "hospitalAddress": { ".validate": "newData.isString()" },
+            "patientName": { ".validate": "newData.isString()" },
+            "requiredUnits": { ".validate": "newData.isNumber()" },
+            "urgencyLevel": { ".validate": "newData.isString()" }
+          },
+          "health": {
+            ".read": "auth != null && auth.uid == $uid",
+            ".write": "auth != null && auth.uid == $uid",
+            "lastDonationDate": { ".validate": "newData.isString()" },
+            "healthStatus": { ".validate": "newData.isString()" },
+            "medicalConditions": { ".validate": "newData.isString()" }
+          },
+          "achievements": {
+            ".read": "auth != null && auth.uid == $uid",
+            ".write": "auth != null && auth.uid == $uid",
+            "totalDonations": { ".validate": "newData.isNumber()" },
+            "badges": { ".validate": "newData.isString()" }
+          }
+        }
+      },
+      "emails": {
+        ".read": "auth != null",
+        "$uid": {
+          ".read": "auth != null",
+          ".write": "auth != null",
+          "$recipientId": {
+            ".read": "auth != null && (auth.uid == $uid || auth.uid == $recipientId)",
+            ".write": "auth != null && (auth.uid == $uid || auth.uid == $recipientId)"
+          }
+        }
+      },
+      "notifications": {
+        "$uid": {
+          ".read": "auth != null && auth.uid == $uid",
+          ".write": "auth != null",
+          "$notificationId": {
+            ".read": "auth != null && auth.uid == $uid",
+            ".write": "auth != null && auth.uid == $uid",
+            "receiverId": { ".validate": "newData.isString()" },
+            "senderId": { ".validate": "newData.isString()" },
+            "text": { ".validate": "newData.isString()" },
+            "date": { ".validate": "newData.isString()" },
+            "isRead": { ".validate": "newData.isBoolean()" }
+          }
+        }
+      },
+      "emergency_requests": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$requestId": {
+          ".read": "auth != null",
+          ".write": "auth != null",
+          "hospitalName": { ".validate": "newData.isString()" },
+          "hospitalAddress": { ".validate": "newData.isString()" },
+          "hospitalContact": { ".validate": "newData.isString()" },
+          "patientName": { ".validate": "newData.isString()" },
+          "bloodGroup": { ".validate": "newData.isString()" },
+          "unitsNeeded": { ".validate": "newData.isString()" },
+          "emergencyDetails": { ".validate": "newData.isString()" },
+          "status": { ".validate": "newData.isString()" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "requestedBy": { ".validate": "newData.isString()" },
+          "latitude": { ".validate": "newData.isNumber() || newData.val() == null" },
+          "longitude": { ".validate": "newData.isNumber() || newData.val() == null" },
+          "responses": {
+            "$responseId": {
+              "donorId": { ".validate": "newData.isString()" },
+              "status": { ".validate": "newData.isString()" },
+              "timestamp": { ".validate": "newData.isNumber()" },
+              "message": { ".validate": "newData.isString()" }
+            }
+          }
+        }
+      },
+      "emergency_responses": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$responseId": {
+          ".read": "auth != null",
+          ".write": "auth != null",
+          "requestId": { ".validate": "newData.isString()" },
+          "donorId": { ".validate": "newData.isString()" },
+          "status": { ".validate": "newData.isString()" },
+          "timestamp": { ".validate": "newData.isNumber()" },
+          "message": { ".validate": "newData.isString()" }
+        }
+      },
+      "donations": {
+        ".indexOn": ["donorId", "timestamp"],
+        ".read": "auth != null",
+        "$donationId": {
+          ".write": "auth != null",
+          "donorId": { ".validate": "newData.isString()" },
+          "bloodGroup": { ".validate": "newData.isString()" },
+          "donationDate": { ".validate": "newData.isString()" },
+          "donationCenter": { ".validate": "newData.isString()" },
+          "status": { ".validate": "newData.isString()" },
+          "emergencyRequestId": { ".validate": "newData.isString()" },
+          "timestamp": { ".validate": "newData.isNumber()" }
+        }
+      },
+      "Chats": {
+        ".read": "auth != null",
+        "$chatId": {
+          ".read": "auth != null",
+          ".write": "auth != null",
+          "messages": {
+            "$messageId": {
+              ".read": "auth != null",
+              ".write": "auth != null",
+              "senderId": { ".validate": "newData.isString()" },
+              "receiverId": { ".validate": "newData.isString()" },
+              "message": { ".validate": "newData.isString()" },
+              "timestamp": { ".validate": "newData.isNumber()" }
+            }
+          }
+        }
+      },
+      "donor_health": {
+        ".read": "auth != null",
+        "$donorId": {
+          ".read": "auth != null && auth.uid == $donorId",
+          ".write": "auth != null && auth.uid == $donorId",
+          "donorId": { ".validate": "newData.isString()" },
+          "lastDonationDate": { ".validate": "newData.isNumber()" },
+          "totalDonations": { ".validate": "newData.isNumber()" },
+          "lastUpdated": { ".validate": "newData.isNumber()" },
+          "lastHealthStatus": { ".validate": "newData.isString()" },
+          "deferralReason": { ".validate": "newData.isString()" },
+          "healthMetrics": {
+            "hemoglobinLevel": { ".validate": "newData.isNumber()" },
+            "bloodPressureSystolic": { ".validate": "newData.isNumber()" },
+            "bloodPressureDiastolic": { ".validate": "newData.isNumber()" },
+            "weight": { ".validate": "newData.isNumber()" },
+            "temperature": { ".validate": "newData.isNumber()" },
+            "pulseRate": { ".validate": "newData.isNumber()" }
+          },
+          "healthQuestions": {
+            "feelingWell": { ".validate": "newData.isBoolean()" },
+            "takenMedication": { ".validate": "newData.isBoolean()" },
+            "traveled": { ".validate": "newData.isBoolean()" },
+            "hadSurgery": { ".validate": "newData.isBoolean()" },
+            "pregnant": { ".validate": "newData.isBoolean()" }
+          }
+        }
+      },
+      "appointments": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$appointmentId": {
+          ".read": "auth != null",
+          ".write": "auth != null",
+          "donorId": { ".validate": "newData.isString()" },
+          "recipientId": { ".validate": "newData.isString()" },
+          "date": { ".validate": "newData.isString()" },
+          "time": { ".validate": "newData.isString()" },
+          "status": { ".validate": "newData.isString()" },
+          "location": { ".validate": "newData.isString()" },
+          "notes": { ".validate": "newData.isString()" }
+        }
+      }
+    }
+}

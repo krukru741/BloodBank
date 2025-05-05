@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -13,8 +14,8 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,6 +23,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -34,8 +36,14 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -47,8 +55,8 @@ public class RecipientRegistrationActivity extends AppCompatActivity {
     private CircleImageView profile_image;
     private TextInputEditText registeredFullName, registeredIdNumber, registeredPhoneNumber,
             registeredAddress, registeredEmail, registeredPassword, registeredDate;
-    private Spinner bloodGroupsSpinner;
-    private Spinner gendersSpinner;
+    private MaterialAutoCompleteTextView bloodGroupsSpinner;
+    private MaterialAutoCompleteTextView gendersSpinner;
     private Button registerButton;
 
     private Uri resultUri;
@@ -57,6 +65,13 @@ public class RecipientRegistrationActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private DatabaseReference userDatabaseRef;
+
+    private Calendar calendar;
+    private SimpleDateFormat dateFormat;
+
+    private static final String APP_DIRECTORY = "BloodBank";
+    private static final String IMAGE_DIRECTORY = "ProfileImages";
+    private File currentPhotoFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,12 +101,34 @@ public class RecipientRegistrationActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
+        // Initialize gender spinner
+        String[] genderItems = new String[]{"Select your gender", "Male", "Female", "Other"};
+        ArrayAdapter<String> genderAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, genderItems);
+        gendersSpinner.setAdapter(genderAdapter);
+
+        // Initialize blood group spinner
+        String[] bloodGroupItems = new String[]{"Select your blood group", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
+        ArrayAdapter<String> bloodGroupAdapter = new ArrayAdapter<>(this, android.R.layout.simple_dropdown_item_1line, bloodGroupItems);
+        bloodGroupsSpinner.setAdapter(bloodGroupAdapter);
+
         profile_image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType("image/*");
                 startActivityForResult(intent, 1);
+            }
+        });
+
+        // Initialize date picker components
+        calendar = Calendar.getInstance();
+        dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+
+        // Set up date picker
+        registeredDate.setOnClickListener(v -> showDatePicker());
+        registeredDate.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                showDatePicker();
             }
         });
 
@@ -105,8 +142,8 @@ public class RecipientRegistrationActivity extends AppCompatActivity {
                 final String phoneNumber = registeredPhoneNumber.getText().toString().trim();
                 final String address = registeredAddress.getText().toString().trim();
                 final String date = registeredDate.getText().toString().trim();
-                final String gender = gendersSpinner.getSelectedItem().toString();
-                final String bloodGroup = bloodGroupsSpinner.getSelectedItem().toString();
+                final String gender = gendersSpinner.getText().toString();
+                final String bloodGroup = bloodGroupsSpinner.getText().toString();
 
                 if (TextUtils.isEmpty(email)) {
                     registeredEmail.setError("Email is required!");
@@ -133,6 +170,10 @@ public class RecipientRegistrationActivity extends AppCompatActivity {
                 }
                 if (TextUtils.isEmpty(date)) {
                     registeredDate.setError("Enter your birthdate");
+                    return;
+                }
+                if (!isValidDate(date)) {
+                    return;
                 }
                 if (gender.equals("Select your gender")) {
                     Toast.makeText(RecipientRegistrationActivity.this, "Select Gender", Toast.LENGTH_SHORT).show();
@@ -176,106 +217,125 @@ public class RecipientRegistrationActivity extends AppCompatActivity {
                                 userInfo.put("name", fullName);
                                 userInfo.put("email", email);
                                 userInfo.put("idnumber", idNumber);
-                                userInfo.put("phonenumber", phoneNumber);
+                                userInfo.put("phoneNumber", phoneNumber);
                                 userInfo.put("password", password);
                                 userInfo.put("address", address);
                                 userInfo.put("birthdate", date);
                                 userInfo.put("gender", gender);
-                                userInfo.put("bloodgroup", bloodGroup);
+                                userInfo.put("bloodGroup", bloodGroup);
                                 userInfo.put("type", "recipient");
                                 userInfo.put("search", "recipient"+bloodGroup);
+
+                                // If we have a profile image, save its path
+                                if (currentPhotoFile != null && currentPhotoFile.exists()) {
+                                    userInfo.put("profileImagePath", currentPhotoFile.getAbsolutePath());
+                                }
 
                                 userDatabaseRef.updateChildren(userInfo).addOnCompleteListener(new OnCompleteListener() {
                                     @Override
                                     public void onComplete(@NonNull Task task) {
-                                        if (task.isSuccessful()){
-                                            Toast.makeText(RecipientRegistrationActivity.this, "Data set successfully", Toast.LENGTH_SHORT).show();
-                                        }else {
-                                            Toast.makeText(RecipientRegistrationActivity.this, task.getException().toString(), Toast.LENGTH_SHORT).show();
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(RecipientRegistrationActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
+                                            Intent intent = new Intent(RecipientRegistrationActivity.this, VerifyEmailActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        } else {
+                                            Toast.makeText(RecipientRegistrationActivity.this, "Database error: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                         }
-
-                                        finish();
                                         loader.dismiss();
                                     }
                                 });
-
-                                if (resultUri !=null){
-                                    final StorageReference filePath = FirebaseStorage.getInstance().getReference()
-                                            .child("profile images").child(currentUserId);
-                                    Bitmap bitmap = null;
-
-                                    try {
-                                        bitmap = MediaStore.Images.Media.getBitmap(getApplication().getContentResolver(), resultUri);
-                                    }catch (IOException e){
-                                        e.printStackTrace();
-                                    }
-                                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 20, byteArrayOutputStream);
-                                    byte[] data  = byteArrayOutputStream.toByteArray();
-                                    UploadTask uploadTask = filePath.putBytes(data);
-
-                                    uploadTask.addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(RecipientRegistrationActivity.this, "Image Upload Failed", Toast.LENGTH_SHORT).show();
-                                        }
-                                    });
-
-                                    uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                                        @Override
-                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-
-                                            if (taskSnapshot.getMetadata() !=null && taskSnapshot.getMetadata().getReference() !=null){
-                                                Task<Uri> result = taskSnapshot.getStorage().getDownloadUrl();
-                                                result.addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                    @Override
-                                                    public void onSuccess(Uri uri) {
-                                                        String imageUrl = uri.toString();
-                                                        Map newImageMap = new HashMap();
-                                                        newImageMap.put("profilepictureurl", imageUrl);
-                                                        userDatabaseRef.updateChildren(newImageMap).addOnCompleteListener(new OnCompleteListener() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task task) {
-                                                                if (task.isSuccessful()){
-//                                                                    Toast.makeText(RecipientRegistrationActivity.this, "Image url added to database successfully", Toast.LENGTH_SHORT).show();
-                                                                }else {
-                                                                    Toast.makeText(RecipientRegistrationActivity.this, task.getException().toString(), Toast.LENGTH_SHORT).show();
-                                                                }
-                                                            }
-                                                        });
-
-                                                        finish();
-                                                    }
-                                                });
-                                            }
-
-                                        }
-                                    });
-
-
-                                }
-
-                                Intent intent = new Intent(RecipientRegistrationActivity.this, VerifyEmailActivity.class);
-                                startActivity(intent);
-                                finish();
-                                loader.dismiss();
                             }
-
-
                         }
                     });
-
-
                 }
             }
         });
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode ==1 && resultCode == RESULT_OK && data !=null){
+        if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             resultUri = data.getData();
             profile_image.setImageURI(resultUri);
+            
+            try {
+                // Create directory if it doesn't exist
+                File storageDir = new File(getFilesDir(), APP_DIRECTORY + File.separator + IMAGE_DIRECTORY);
+                if (!storageDir.exists()) {
+                    storageDir.mkdirs();
+                }
+
+                // Create a unique filename
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+                String imageFileName = "JPEG_" + timeStamp + "_";
+                currentPhotoFile = File.createTempFile(
+                    imageFileName,
+                    ".jpg",
+                    storageDir
+                );
+
+                // Save the image to internal storage
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), resultUri);
+                FileOutputStream out = new FileOutputStream(currentPhotoFile);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                out.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Toast.makeText(RecipientRegistrationActivity.this, "Error saving profile image", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
+    private void showDatePicker() {
+        DatePickerDialog.OnDateSetListener dateSetListener = (view, year, month, dayOfMonth) -> {
+            calendar.set(Calendar.YEAR, year);
+            calendar.set(Calendar.MONTH, month);
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+            updateDateField();
+        };
+
+        new DatePickerDialog(
+            this,
+            dateSetListener,
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show();
+    }
+
+    private void updateDateField() {
+        registeredDate.setText(dateFormat.format(calendar.getTime()));
+    }
+
+    private boolean isValidDate(String dateStr) {
+        try {
+            Date date = dateFormat.parse(dateStr);
+            Calendar inputDate = Calendar.getInstance();
+            inputDate.setTime(date);
+            
+            // Get current date
+            Calendar currentDate = Calendar.getInstance();
+            
+            // Check if birth date is in the future
+            if (inputDate.after(currentDate)) {
+                registeredDate.setError("Birth date cannot be in the future");
+                return false;
+            }
+            
+            // Check if age is at least 18 years
+            Calendar minAgeDate = Calendar.getInstance();
+            minAgeDate.add(Calendar.YEAR, -18);
+            if (inputDate.after(minAgeDate)) {
+                registeredDate.setError("You must be at least 18 years old");
+                return false;
+            }
+            
+            return true;
+        } catch (Exception e) {
+            registeredDate.setError("Invalid date format");
+            return false;
         }
     }
 }

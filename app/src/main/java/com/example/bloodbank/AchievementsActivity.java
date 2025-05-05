@@ -3,6 +3,7 @@ package com.example.bloodbank;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.ProgressBar;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -27,8 +28,11 @@ public class AchievementsActivity extends AppCompatActivity {
     private TextView rankText;
     private TextView pointsText;
     private TextView streakText;
+    private TextView nextTitleText;
+    private TextView progressText;
     private RecyclerView badgesRecyclerView;
     private RecyclerView achievementsRecyclerView;
+    private ProgressBar progressIndicator;
 
     private FirebaseFirestore db;
     private String userId;
@@ -62,8 +66,11 @@ public class AchievementsActivity extends AppCompatActivity {
         rankText = findViewById(R.id.rankText);
         pointsText = findViewById(R.id.pointsText);
         streakText = findViewById(R.id.streakText);
+        nextTitleText = findViewById(R.id.nextTitleText);
+        progressText = findViewById(R.id.progressText);
         badgesRecyclerView = findViewById(R.id.badgesRecyclerView);
         achievementsRecyclerView = findViewById(R.id.achievementsRecyclerView);
+        progressIndicator = findViewById(R.id.progressIndicator);
 
         // Set up RecyclerViews
         badgesRecyclerView.setLayoutManager(new GridLayoutManager(this, 3));
@@ -87,11 +94,44 @@ public class AchievementsActivity extends AppCompatActivity {
         pointsText.setText("Total Points: " + achievement.getTotalPoints());
         streakText.setText("Current Streak: " + achievement.getDonationStreak());
 
+        // Calculate progress toward next title
+        int currentPoints = achievement.getTotalPoints();
+        int nextTitlePoints = getNextTitlePoints(currentPoints);
+        int progress = (int) ((float) currentPoints / nextTitlePoints * 100);
+        
+        // Update progress bar
+        progressIndicator.setProgress(progress);
+        
+        // Update next title text
+        String nextTitle = getNextTitle(currentPoints);
+        nextTitleText.setText("Next Title: " + nextTitle);
+        
+        // Update progress text
+        progressText.setText(currentPoints + "/" + nextTitlePoints + " points");
+
         // Update badges
         updateBadges(achievement.getBadges());
 
         // Update recent achievements
         updateRecentAchievements(achievement.getAchievementDates());
+    }
+
+    private int getNextTitlePoints(int currentPoints) {
+        if (currentPoints < 50) return 50;        // Next: Active Donor
+        if (currentPoints < 100) return 100;      // Next: Blood Champion
+        if (currentPoints < 250) return 250;      // Next: Regular Hero
+        if (currentPoints < 500) return 500;      // Next: Elite Donor
+        if (currentPoints < 1000) return 1000;    // Next: Legendary Lifesaver
+        return 1000;                              // Max level reached
+    }
+
+    private String getNextTitle(int currentPoints) {
+        if (currentPoints < 50) return "Active Donor";
+        if (currentPoints < 100) return "Blood Champion";
+        if (currentPoints < 250) return "Regular Hero";
+        if (currentPoints < 500) return "Elite Donor";
+        if (currentPoints < 1000) return "Legendary Lifesaver";
+        return "Max Level Reached";
     }
 
     private void updateBadges(Map<String, Boolean> badges) {

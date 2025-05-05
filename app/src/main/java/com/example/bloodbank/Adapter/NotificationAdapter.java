@@ -42,12 +42,42 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        final Notification notification = notificationList.get(position);
+        Notification notification = notificationList.get(position);
+        
+        // Get user details
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference().child("users")
+                .child(notification.getUserId());
+        
+        userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    User user = snapshot.getValue(User.class);
+                    if (user != null) {
+                        holder.username.setText(user.getName());
 
-        holder.notification_text.setText(notification.getText());
-        holder.notification_date.setText(notification.getDate());
+                        // Load profile image
+                        if (user.getProfileImagePath() != null && !user.getProfileImagePath().isEmpty()) {
+                            Glide.with(context)
+                                    .load(new java.io.File(user.getProfileImagePath()))
+                                    .placeholder(R.drawable.profile_pic)
+                                    .error(R.drawable.profile_pic)
+                                    .into(holder.profileImage);
+                        } else {
+                            holder.profileImage.setImageResource(R.drawable.profile_pic);
+                        }
+                    }
+                }
+            }
 
-        getUserInfo(holder.notification_profile_image, holder.notification_name, notification.getSenderId());
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle error silently
+            }
+        });
+        
+        holder.message.setText(notification.getMessage());
+        holder.time.setText(notification.getTime());
     }
 
     @Override
@@ -55,35 +85,17 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
         return notificationList.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
-
-        public CircleImageView notification_profile_image;
-        public TextView notification_name, notification_text, notification_date;
+    public class ViewHolder extends RecyclerView.ViewHolder {
+        public CircleImageView profileImage;
+        public TextView username, message, time;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            notification_profile_image = itemView.findViewById(R.id.notification_profile_image);
-            notification_name = itemView.findViewById(R.id.notification_name);
-            notification_text = itemView.findViewById(R.id.notification_text);
-            notification_date = itemView.findViewById(R.id.notification_date);
+            profileImage = itemView.findViewById(R.id.notification_profile_image);
+            username = itemView.findViewById(R.id.notification_name);
+            message = itemView.findViewById(R.id.notification_text);
+            time = itemView.findViewById(R.id.notification_date);
         }
-    }
-
-    private void getUserInfo(final CircleImageView circleImageView,final TextView nameTextView, final String senderId) {
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("users").child(senderId);
-        reference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                User user = snapshot.getValue(User.class);
-                nameTextView.setText(user.getName());
-                Glide.with(context).load(user.getProfilepictureurl()).into(circleImageView);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 }

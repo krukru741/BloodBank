@@ -3,33 +3,30 @@ package com.example.bloodbank;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
-import androidx.appcompat.app.ActionBar;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.TextView;
 
 public class FaqActivity extends AppCompatActivity {
 
-
-
-    TextView heading , content , first , second , third , fourth , fifth;
-    CardView cardView1;
-    private Button backBtn;
+    TextView heading, content, first, second, third, fourth, fifth;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_faq);
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null){
-            actionBar.setDisplayHomeAsUpEnabled(true);
+
+        // Setup toolbar
+        toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(true);
         }
 
         heading = findViewById(R.id.heading);
@@ -39,13 +36,12 @@ public class FaqActivity extends AppCompatActivity {
         third = findViewById(R.id.third);
         fourth = findViewById(R.id.fourth);
         fifth = findViewById(R.id.fifth);
-        cardView1 = findViewById(R.id.cv_1);
-        backBtn = findViewById(R.id.backBtn);
 
         content.setText("Did you know one unit of donated blood can save up to three lives? This is because your blood is separated into its " +
                 "components (red blood cells, plasma, and platelet). Moreover, blood is needed on a regular basis for people suffering from blood disorders such as thalassemia and hemophilia," +
                 " and also for the treatment of injuries after an accident, major surgeries, anemia, etc." +
                 " \nWondering if you are eligible for donating blood? \nHere is what you need to know before you plan for blood donation.");
+
         heading.setTypeface(null, Typeface.BOLD);
         content.setTypeface(null, Typeface.BOLD);
         first.setTypeface(null, Typeface.BOLD);
@@ -53,109 +49,167 @@ public class FaqActivity extends AppCompatActivity {
         third.setTypeface(null, Typeface.BOLD);
         fourth.setTypeface(null, Typeface.BOLD);
         fifth.setTypeface(null, Typeface.BOLD);
-
-        heading.setTextColor(0xFFCCCCCC);
-        content.setTextColor(0xFFCCCCCC);
-        first.setTextColor(0xFFCCCCCC);
-        second.setTextColor(0xFFCCCCCC);
-        third.setTextColor(0xFFCCCCCC);
-        fourth.setTextColor(0xFFCCCCCC);
-        fifth.setTextColor(0xFFCCCCCC);
-
-        backBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(FaqActivity.this, MainActivity.class);
-                startActivity(intent);
-                finish();
-            }
-        });
-
-
-
     }
+
     @Override
-    public boolean onSupportNavigateUp() {
-        finish();
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
         return true;
-    }
-    public void whyDonate(View view) {
-
-        if(first.getVisibility() == view.INVISIBLE){
-            first.setText("Blood donation not only saves lives but also has key benefits that we are unaware of.  It balances the level of iron in the body, regulates blood flow, reduces the risk of cardiovascular disease and stroke, triggers production of new blood cells and helps in weight loss. Moreover,  donating blood had a positive effect on a donor’s physical and psychological well-being as well.");
-            first.setVisibility(View.VISIBLE);
         }
-        else{
-            first.setText(" ");
-            first.setVisibility(View.INVISIBLE);
+        return super.onOptionsItemSelected(item);
+    }
+
+    public void whyDonate(View view) {
+        if (first.getVisibility() == View.GONE) {
+            first.setText("Blood donation not only saves lives but also has key benefits that we are unaware of:\n\n" +
+                    "1. Health Benefits:\n" +
+                    "   • Balances iron levels in the body\n" +
+                    "   • Reduces risk of cardiovascular diseases\n" +
+                    "   • Stimulates production of new blood cells\n" +
+                    "   • Helps in weight management\n" +
+                    "   • Improves overall blood circulation\n\n" +
+                    "2. Psychological Benefits:\n" +
+                    "   • Creates a sense of fulfillment\n" +
+                    "   • Reduces stress and anxiety\n" +
+                    "   • Boosts self-esteem\n" +
+                    "   • Promotes social responsibility\n\n" +
+                    "3. Medical Benefits:\n" +
+                    "   • Free health check-up before donation\n" +
+                    "   • Regular blood pressure monitoring\n" +
+                    "   • Hemoglobin level check\n" +
+                    "   • Early detection of potential health issues\n\n" +
+                    "4. Community Impact:\n" +
+                    "   • Helps accident victims\n" +
+                    "   • Supports cancer patients\n" +
+                    "   • Aids in surgical procedures\n" +
+                    "   • Saves lives during emergencies");
+            first.setVisibility(View.VISIBLE);
+        } else {
+            first.setVisibility(View.GONE);
         }
     }
 
     public void eligible(View view) {
-        if(second.getVisibility() == view.INVISIBLE){
-            second.setText("Any healthy adult, both male and female, can donate blood. A healthy individual can safely donate one unit of blood, that is, 350 ml. Men can donate safely once in every three months while women can donate every four months. However, there are certain factors you need to fulfill to be considered as a donor. These include:\n" +
-                    "\nWeight: The donor should not weigh less than 45 kgs\n \nPulse: The pulse rate of the donor should be normal (60 to 100 beats per minute)\n \nBody temperature: Normal body temperature is  98.6°F (37°C)\n" +
-                    "\nHemoglobin: It should not be less than 12.5 grams per deciliter\n \nBlood pressure: Systolic and diastolic blood pressure should be within normal range (120/80 mm Hg) \n\nAge: Donors should be in the age group of 18 – 65 years");
+        if (second.getVisibility() == View.GONE) {
+            second.setText("To ensure the safety of both donors and recipients, there are specific eligibility criteria:\n\n" +
+                    "1. Basic Requirements:\n" +
+                    "   • Age: 18-65 years\n" +
+                    "   • Weight: Minimum 45 kg\n" +
+                    "   • Pulse: 60-100 beats per minute\n" +
+                    "   • Body Temperature: 98.6°F (37°C)\n" +
+                    "   • Hemoglobin: Minimum 12.5 g/dL\n" +
+                    "   • Blood Pressure: 120/80 mm Hg\n\n" +
+                    "2. Health Conditions:\n" +
+                    "   • Must be in good health\n" +
+                    "   • No active infections\n" +
+                    "   • No chronic diseases\n" +
+                    "   • No recent surgeries\n\n" +
+                    "3. Lifestyle Factors:\n" +
+                    "   • No alcohol consumption 24 hours before donation\n" +
+                    "   • No smoking 2 hours before donation\n" +
+                    "   • Adequate sleep the night before\n" +
+                    "   • Proper hydration\n\n" +
+                    "4. Donation Frequency:\n" +
+                    "   • Men: Every 3 months\n" +
+                    "   • Women: Every 4 months\n" +
+                    "   • Maximum 4 donations per year");
             second.setVisibility(View.VISIBLE);
-        }
-        else{
-            second.setText(" ");
-            second.setVisibility(View.INVISIBLE);
+        } else {
+            second.setVisibility(View.GONE);
         }
     }
 
     public void notEligible(View view) {
-        if(third.getVisibility() == View.INVISIBLE){
-            third.setText("You cannot donate blood if you: \n\n1. Suffer from common health problems such as cold, flu, sore throat, cold sore, stomach infection or any other infection." +
-                    "\n\n2. Had any dental procedures done such as filling, cleaning or restoration the day before the donation." +
-                    "\n\n3. Are diabetic and taking insulin injections to manage diabetes. \n\n4. Ever had an intravenous administration of drugs (even once)." +
-                    "\n\n5. Have any tattoos or acupuncture done in the last 12 months or have have had tattoo removal surgery in the last six months." +
-                    "\n\n6. Are pregnant, have delivered within a year or are breastfeeding.");
+        if (third.getVisibility() == View.GONE) {
+            third.setText("You cannot donate blood if you:\n\n" +
+                    "1. Health Conditions:\n" +
+                    "   • Active infections (cold, flu, etc.)\n" +
+                    "   • Chronic diseases (diabetes, heart disease)\n" +
+                    "   • Blood disorders\n" +
+                    "   • Cancer or history of cancer\n" +
+                    "   • HIV/AIDS or other STDs\n\n" +
+                    "2. Recent Medical Procedures:\n" +
+                    "   • Dental work within 24 hours\n" +
+                    "   • Surgery within 6 months\n" +
+                    "   • Tattoos or piercings within 12 months\n" +
+                    "   • Acupuncture within 12 months\n\n" +
+                    "3. Lifestyle Factors:\n" +
+                    "   • Intravenous drug use\n" +
+                    "   • Multiple sexual partners\n" +
+                    "   • Recent travel to malaria-endemic areas\n" +
+                    "   • History of hepatitis\n\n" +
+                    "4. Special Conditions:\n" +
+                    "   • Pregnancy or breastfeeding\n" +
+                    "   • Recent childbirth (within 1 year)\n" +
+                    "   • Menstruation (temporary restriction)\n" +
+                    "   • Low iron levels");
             third.setVisibility(View.VISIBLE);
-        }
-
-        else {
-            third.setText(" ");
-            third.setVisibility(View.INVISIBLE);
-        }
-    }
-
-    public void after(View view) {
-        if(fifth.getVisibility() == View.INVISIBLE){
-            fifth.setText("1. Eat something that is rich in sugar post blood donation as it can up your energy levels.\n" +
-                    "\n2. Increase your fluid intake for the next 24 to 48 hours.\n" +
-                    "\n3. Avoid strenuous physical exertion. \n\n4. Eat well balanced meals for the next 24 hours to rejuvenate your body." +
-                    "\n\n5. Do not smoke or consume alcohol for at least 24 hours after donation.");
-            fifth.setVisibility(View.VISIBLE);
-        }
-        else{
-            fifth.setText(" ");
-            fifth.setVisibility(View.INVISIBLE);
+        } else {
+            third.setVisibility(View.GONE);
         }
     }
 
     public void before(View view) {
-        if(fourth.getVisibility() == View.INVISIBLE){
-            fourth.setText("1. Eat something light before donating blood and hydrate yourself as it helps you to avoid weakness.\n" +
-                    "\n2. Avoid drinking alcohol the day prior to blood donation.\n" +
-                    "\n3. Do not smoke for at least 2 hours before blood donation.");
+        if (fourth.getVisibility() == View.GONE) {
+            fourth.setText("Preparing for blood donation is crucial for a safe and comfortable experience:\n\n" +
+                    "1. Day Before Donation:\n" +
+                    "   • Get adequate sleep (7-8 hours)\n" +
+                    "   • Avoid alcohol consumption\n" +
+                    "   • Stay hydrated (drink plenty of water)\n" +
+                    "   • Eat iron-rich foods\n\n" +
+                    "2. Morning of Donation:\n" +
+                    "   • Eat a healthy breakfast\n" +
+                    "   • Drink extra fluids\n" +
+                    "   • Avoid fatty foods\n" +
+                    "   • Wear comfortable clothing\n\n" +
+                    "3. At the Donation Center:\n" +
+                    "   • Bring valid ID\n" +
+                    "   • Complete health questionnaire\n" +
+                    "   • Undergo mini-physical exam\n" +
+                    "   • Relax and stay calm\n\n" +
+                    "4. Important Reminders:\n" +
+                    "   • No smoking 2 hours before\n" +
+                    "   • No heavy exercise\n" +
+                    "   • No aspirin 48 hours before\n" +
+                    "   • No alcohol 24 hours before");
             fourth.setVisibility(View.VISIBLE);
-        }
-        else{
-            fourth.setText(" ");
-            fourth.setVisibility(View.INVISIBLE);
-        }
-    }
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        } else {
+            fourth.setVisibility(View.GONE);
         }
     }
 
-
+    public void after(View view) {
+        if (fifth.getVisibility() == View.GONE) {
+            fifth.setText("Proper care after blood donation ensures quick recovery:\n\n" +
+                    "1. Immediate Aftercare:\n" +
+                    "   • Rest for 10-15 minutes\n" +
+                    "   • Drink plenty of fluids\n" +
+                    "   • Eat light snacks provided\n" +
+                    "   • Keep bandage on for 4-6 hours\n\n" +
+                    "2. First 24 Hours:\n" +
+                    "   • Increase fluid intake\n" +
+                    "   • Eat iron-rich foods\n" +
+                    "   • Avoid strenuous activities\n" +
+                    "   • No heavy lifting\n\n" +
+                    "3. Diet Recommendations:\n" +
+                    "   • Eat balanced meals\n" +
+                    "   • Include protein-rich foods\n" +
+                    "   • Consume iron-rich foods\n" +
+                    "   • Avoid alcohol and caffeine\n\n" +
+                    "4. Activity Guidelines:\n" +
+                    "   • No smoking for 24 hours\n" +
+                    "   • No alcohol for 24 hours\n" +
+                    "   • No heavy exercise for 24 hours\n" +
+                    "   • No hot baths or saunas\n\n" +
+                    "5. Warning Signs:\n" +
+                    "   • Dizziness or lightheadedness\n" +
+                    "   • Nausea or vomiting\n" +
+                    "   • Bleeding from puncture site\n" +
+                    "   • Unusual pain or discomfort");
+            fifth.setVisibility(View.VISIBLE);
+        } else {
+            fifth.setVisibility(View.GONE);
+        }
+    }
 }

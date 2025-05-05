@@ -19,8 +19,20 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycleView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         app:layout_anchor="@+id/recycleView"
         app:layout_anchorGravity="center" />
+
+    <TextView
+        android:id="@+id/noUsersText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:text="No users found"
+        android:textSize="16sp"
+        android:visibility="gone"
+        android:textColor="#990f10" />
 
 </LinearLayout>

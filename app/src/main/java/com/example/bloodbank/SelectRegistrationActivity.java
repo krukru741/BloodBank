@@ -7,9 +7,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import com.google.android.material.button.MaterialButton;
+
 public class SelectRegistrationActivity extends AppCompatActivity {
 
-    private TextView donorButton, recipientButton;
+    private MaterialButton donorButton, recipientButton;
     private TextView backButton;
 
     @Override
@@ -17,33 +19,42 @@ public class SelectRegistrationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_registration);
 
+        initializeViews();
+        setupClickListeners();
+    }
+
+    private void initializeViews() {
         donorButton = findViewById(R.id.donorButton);
         recipientButton = findViewById(R.id.recipientButton);
         backButton = findViewById(R.id.backButton);
+    }
 
-        donorButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(SelectRegistrationActivity.this, DonorRegistrationActivity.class);
-                startActivity(intent);
-            }
+    private void setupClickListeners() {
+        donorButton.setOnClickListener(v -> {
+            navigateToActivity(DonorRegistrationActivity.class);
         });
 
-        recipientButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(SelectRegistrationActivity.this, RecipientRegistrationActivity.class);
-                startActivity(intent);
-            }
+        recipientButton.setOnClickListener(v -> {
+            navigateToActivity(RecipientRegistrationActivity.class);
         });
 
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(SelectRegistrationActivity.this, LoginActivity.class);
-                startActivity(intent);
-
-            }
+        backButton.setOnClickListener(v -> {
+            navigateToActivity(LoginActivity.class);
         });
+    }
+
+    private void navigateToActivity(Class<?> activityClass) {
+        Intent intent = new Intent(SelectRegistrationActivity.this, activityClass);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Clean up references
+        donorButton = null;
+        recipientButton = null;
+        backButton = null;
     }
 }

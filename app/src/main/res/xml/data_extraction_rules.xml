@@ -9,11 +9,9 @@
         <include .../>
         <exclude .../>
         -->
+        <exclude domain="sharedpref" path="device.xml"/>
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <exclude domain="sharedpref" path="device.xml"/>
     </device-transfer>
-    -->
 </data-extraction-rules>
