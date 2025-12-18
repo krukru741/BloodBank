@@ -22,4 +22,4 @@ public class LocationHelper {
         double distance = calculateDistance(lat1, lon1, lat2, lon2);
         return distance <= MAX_DISTANCE_KM;
     }
-} 
+}
