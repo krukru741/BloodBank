@@ -1,6 +1,8 @@
 plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
+    id 'com.google.dagger.hilt.android' // Add the Hilt plugin
+    id 'kotlin-kapt' // Add the KAPT plugin for annotation processing
 }
 
 android {
@@ -94,6 +96,10 @@ dependencies {
     implementation files('libs/activation.jar')
     implementation files('libs/additionnal.jar')
     implementation files('libs/mail.jar')
+
+    // Hilt dependencies
+    implementation "com.google.dagger:hilt-android:2.50"
+    kapt "com.google.dagger:hilt-compiler:2.50"
     
     // Testing
     testImplementation 'junit:junit:4.13.2'
@@ -102,14 +108,13 @@ dependencies {
 
     // UI Components
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'androidx.multidex:multidex:2.0.1' // This was duplicated, kept the first instance
     implementation 'de.hdodenhof:circleimageview:3.1.0'
 
     // Image Loading
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
-    // MultiDex Support
-    implementation 'androidx.multidex:multidex:2.0.1'
+    // MultiDex Support (This was duplicated, removed the second instance)
+    // implementation 'androidx.multidex:multidex:2.0.1'
 }

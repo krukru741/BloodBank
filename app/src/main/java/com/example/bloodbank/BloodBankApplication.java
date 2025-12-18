@@ -6,7 +6,9 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.FirebaseDatabase;
+import dagger.hilt.android.HiltAndroidApp; // Added import for HiltAndroidApp
 
+@HiltAndroidApp // Added HiltAndroidApp annotation
 public class BloodBankApplication extends MultiDexApplication {
     private static final String TAG = "BloodBankApplication";
 
@@ -45,4 +47,4 @@ public class BloodBankApplication extends MultiDexApplication {
             Log.i(TAG, "Google Play Services is available");
         }
     }
-} 
+}
