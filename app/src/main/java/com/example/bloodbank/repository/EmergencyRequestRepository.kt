@@ -1,15 +1,12 @@
 package com.example.bloodbank.repository
 
 import com.example.bloodbank.Model.EmergencyRequest
-import com.example.bloodbank.Model.EmergencyResponse
 import kotlinx.coroutines.flow.Flow
 
 interface EmergencyRequestRepository {
-    fun createEmergencyRequest(request: EmergencyRequest): Flow<Result<Unit>>
-    fun getEmergencyRequestById(requestId: String): Flow<EmergencyRequest?>
-    fun getAllEmergencyRequests(): Flow<List<EmergencyRequest>>
-    fun getEmergencyRequestsByUserId(userId: String): Flow<List<EmergencyRequest>>
+    fun createEmergencyRequest(emergencyRequest: EmergencyRequest): Flow<Result<Unit>>
+    fun getEmergencyRequest(requestId: String): Flow<Result<EmergencyRequest?>>
+    fun getAllEmergencyRequests(): Flow<Result<List<EmergencyRequest>>>
     fun updateEmergencyRequestStatus(requestId: String, status: String): Flow<Result<Unit>>
-    fun respondToEmergencyRequest(requestId: String, response: EmergencyResponse): Flow<Result<Unit>>
-    fun acceptDonorForRequest(requestId: String, donorId: String): Flow<Result<Unit>>
+    fun addResponseToEmergencyRequest(requestId: String, donorId: String, accepted: Boolean): Flow<Result<Unit>>
 }

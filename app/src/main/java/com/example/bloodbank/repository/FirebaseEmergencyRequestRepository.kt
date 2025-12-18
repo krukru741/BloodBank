@@ -2,7 +2,7 @@ package com.example.bloodbank.repository
 
 import com.example.bloodbank.DatabaseHelper
 import com.example.bloodbank.Model.EmergencyRequest
-import com.example.bloodbank.Model.EmergencyResponse
+import com.example.bloodbank.Model.EmergencyResponse // Assuming this class exists
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -39,10 +39,13 @@ class FirebaseEmergencyRequestRepository @Inject constructor(
             return@callbackFlow
         }
 
+        // Ensure the request object contains the userId for proper querying later
         val updatedRequest = request.copy(
             requestId = requestId,
-            userId = userId,
-            timestamp = System.currentTimeMillis()
+            requesterId = userId, // Assign the current user as the requester
+            timestamp = System.currentTimeMillis(),
+            status = "pending", // Default status
+            responses = request.responses ?: hashMapOf() // Ensure responses map is initialized
         )
 
         newRequestRef.setValue(updatedRequest)
@@ -57,14 +60,21 @@ class FirebaseEmergencyRequestRepository @Inject constructor(
         awaitClose()
     }
 
-    override fun getEmergencyRequestById(requestId: String): Flow<EmergencyRequest?> = callbackFlow {
+    override fun getEmergencyRequestById(requestId: String): Flow<Result<EmergencyRequest?>> = callbackFlow {
         val requestRef = databaseHelper.getEmergencyRequestReference(requestId)
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                trySend(snapshot.getValue(EmergencyRequest::class.java))
+                try {
+                    val request = snapshot.getValue(EmergencyRequest::class.java)
+                    trySend(Result.Success(request))
+                } catch (e: Exception) {
+                    trySend(Result.Error(e))
+                    close(e)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
+                trySend(Result.Error(error.toException()))
                 close(error.toException())
             }
         }
@@ -72,15 +82,21 @@ class FirebaseEmergencyRequestRepository @Inject constructor(
         awaitClose { requestRef.removeEventListener(listener) }
     }
 
-    override fun getAllEmergencyRequests(): Flow<List<EmergencyRequest>> = callbackFlow {
+    override fun getAllEmergencyRequests(): Flow<Result<List<EmergencyRequest>>> = callbackFlow {
         val allRequestsRef = databaseHelper.getEmergencyRequestsReference()
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val requests = snapshot.children.mapNotNull { it.getValue(EmergencyRequest::class.java) }
-                trySend(requests.sortedByDescending { it.timestamp }) // Sort by newest first
+                try {
+                    val requests = snapshot.children.mapNotNull { it.getValue(EmergencyRequest::class.java) }
+                    trySend(Result.Success(requests.sortedByDescending { it.timestamp ?: 0L })) // Sort by newest first, handling null timestamp
+                } catch (e: Exception) {
+                    trySend(Result.Error(e))
+                    close(e)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
+                trySend(Result.Error(error.toException()))
                 close(error.toException())
             }
         }
@@ -88,18 +104,24 @@ class FirebaseEmergencyRequestRepository @Inject constructor(
         awaitClose { allRequestsRef.removeEventListener(listener) }
     }
 
-    override fun getEmergencyRequestsByUserId(userId: String): Flow<List<EmergencyRequest>> = callbackFlow {
+    override fun getEmergencyRequestsByUserId(userId: String): Flow<Result<List<EmergencyRequest>>> = callbackFlow {
         val userRequestsQuery = databaseHelper.getEmergencyRequestsReference()
-            .orderByChild("userId")
+            .orderByChild("requesterId") // Assuming 'requesterId' field in EmergencyRequest
             .equalTo(userId)
 
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val requests = snapshot.children.mapNotNull { it.getValue(EmergencyRequest::class.java) }
-                trySend(requests.sortedByDescending { it.timestamp }) // Sort by newest first
+                try {
+                    val requests = snapshot.children.mapNotNull { it.getValue(EmergencyRequest::class.java) }
+                    trySend(Result.Success(requests.sortedByDescending { it.timestamp ?: 0L }))
+                } catch (e: Exception) {
+                    trySend(Result.Error(e))
+                    close(e)
+                }
             }
 
             override fun onCancelled(error: DatabaseError) {
+                trySend(Result.Error(error.toException()))
                 close(error.toException())
             }
         }
@@ -131,6 +153,8 @@ class FirebaseEmergencyRequestRepository @Inject constructor(
             return@callbackFlow
         }
 
+        // Assuming EmergencyResponse has fields like donorId, accepted, timestamp etc.
+        // It should be designed to be directly storable in Firebase.
         responsesRef.child(responseKey).setValue(response)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {

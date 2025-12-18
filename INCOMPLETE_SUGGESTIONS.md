@@ -6,10 +6,10 @@ This document outlines the remaining suggestions and a roadmap for further enhan
 
 **Category:** Modernize Thoughtfully
 
-*   **Description:** A significant portion of the codebase remains in Java. While `DatabaseHelper`, `MainActivity`, and the `User`, `DonationAppointment`, `Donation`, `DonationCenter`, `DonorHealth`, and `EmergencyRequest` models have been successfully migrated to Kotlin, the next phase involves systematically converting all remaining Java files.
+*   **Description:** A significant portion of the codebase remains in Java. While `DatabaseHelper`, `MainActivity`, and the `User`, `DonationAppointment`, `DonationCenter`, `DonorHealth`, `EmergencyRequest` models, as well as `MainActivity`, `EmergencyRequestActivity`, `DonationCentersActivity`, and `DonationCentersAdapter` have been successfully migrated to Kotlin, the next phase involves systematically converting all remaining Java files.
 *   **Next Steps:**
     *   Continue migrating data models (POJOs) such as `EmergencyResponse`, `Message`, `Notification`, `CompatibleUser`, `DonorAchievement`.
-    *   Identify and migrate core utility classes, Adapters, Activities, and Fragments still in Java.
+    *   Identify and migrate core utility classes, Adapters (e.g., `UserAdapter`, `DonationCenterPickerAdapter`), Activities, and Fragments still in Java.
     *   Prioritize migration based on dependency chains and complexity, starting with smaller, isolated classes.
     *   Leverage Kotlin's features (e.g., data classes, extension functions, coroutines).
 
@@ -17,10 +17,10 @@ This document outlines the remaining suggestions and a roadmap for further enhan
 
 **Category:** Elevate the Architecture
 
-*   **Description:** Transitioning to MVVM will decouple UI logic from business logic, making components more testable, maintainable, and robust against configuration changes. The `MainViewModel`, `MyAppointmentsViewModel`, `DonationCentersViewModel`, and `DonorHealthViewModel` have been created, and `MainActivity`, `MyAppointmentsActivity`, `DonationCentersActivity`, and `DonorHealthActivity` have been refactored to consume data from their respective ViewModels, demonstrating the pattern.
+*   **Description:** Transitioning to MVVM will decouple UI logic from business logic, making components more testable, maintainable, and robust against configuration changes. The `MainViewModel`, `EmergencyRequestViewModel`, `DonationCentersViewModel`, `MyAppointmentsViewModel`, and `DonorHealthViewModel` have been created, and their respective Activities (`MainActivity`, `EmergencyRequestActivity`, `DonationCentersActivity`, `MyAppointmentsActivity`, `DonorHealthActivity`) have been refactored to consume data from them, demonstrating the pattern.
 *   **Next Steps:**
-    *   **Create `ViewModel`s:** For each remaining `Activity` and `Fragment` (e.g., `ProfileActivity`), introduce a corresponding `ViewModel` to hold and manage UI-related data in a lifecycle-conscious way.
-    *   **Utilize `LiveData` or `StateFlow` / `SharedFlow`:** Implement observable data holders in `ViewModel`s to expose data to the UI, ensuring reactive updates and proper lifecycle handling.
+    *   **Create `ViewModel`s:** For each remaining `Activity` and `Fragment` (e.g., `ProfileActivity`, `EmergencyRequestListActivity`, `ChatActivity`), introduce a corresponding `ViewModel` to hold and manage UI-related data in a lifecycle-conscious way.
+    *   **Utilize `LiveData` or `StateFlow` / `SharedFlow`:** Implement observable data holders in new `ViewModel`s to expose data to the UI, ensuring reactive updates and proper lifecycle handling.
     *   **Inject `ViewModel`s:** Use Hilt's `ViewModel` injection capabilities for new ViewModels.
     *   **Update UI:** Modify remaining Activities/Fragments to observe data from their respective `ViewModel`s and update the UI accordingly, minimizing logic within the View layer.
 
@@ -28,10 +28,9 @@ This document outlines the remaining suggestions and a roadmap for further enhan
 
 **Category:** Elevate the Architecture
 
-*   **Description:** Abstracting data sources (currently Firebase) behind a `Repository` layer will centralize data operations, provide a clean API for `ViewModel`s, and make it easier to switch data sources or implement caching strategies in the future. The `UserRepository`, `DonationAppointmentRepository`, `DonationCenterRepository`, and `DonorHealthRepository` interfaces, along with their `FirebaseUserRepository`, `FirebaseDonationAppointmentRepository`, `FirebaseDonationCenterRepository`, and `FirebaseDonorHealthRepository` implementations, have been successfully integrated.
+*   **Description:** Abstracting data sources (currently Firebase) behind a `Repository` layer will centralize data operations, provide a clean API for `ViewModel`s, and make it easier to switch data sources or implement caching strategies in the future. The `UserRepository`, `EmergencyRequestRepository`, `DonationCenterRepository`, `DonationAppointmentRepository`, and `DonorHealthRepository` interfaces, along with their `FirebaseUserRepository`, `FirebaseEmergencyRequestRepository`, `FirebaseDonationCenterRepository`, `FirebaseDonationAppointmentRepository`, and `FirebaseDonorHealthRepository` implementations, have been successfully integrated and bound via Hilt.
 *   **Next Steps:**
-    *   **Define Repository Interfaces:** Create interfaces for other data operations (e.g., `EmergencyRequestRepository`, `NotificationRepository`).
-    *   **Implement Repositories:** Create concrete implementations (e.g., `FirebaseEmergencyRequestRepository`, `FirebaseNotificationRepository`) that use the injected `DatabaseHelper` and `FirebaseAuth` (where applicable).
+    *   **Define Repository Interfaces & Implementations:** Create interfaces and concrete Firebase implementations for other key data models (e.g., `NotificationRepository`, `ChatRepository`, `AchievementRepository`).
     *   **Inject Repositories into `ViewModel`s:** Use Hilt to provide these new repository instances to their respective `ViewModel`s.
     *   **Move Data Logic:** Extract all remaining direct Firebase access logic from Activities, Fragments, and potentially `DatabaseHelper.kt` into the respective repository implementations.
 
@@ -41,14 +40,14 @@ This document outlines the remaining suggestions and a roadmap for further enhan
 
 *   **Description:** Improve the test coverage and quality to ensure the reliability and correctness of the application's logic and UI.
 *   **Next Steps:**
-    *   **Unit Tests for ViewModels & Repositories:** Write comprehensive unit tests for the newly created `ViewModel`s and `Repository`s. Focus on business logic and data transformations. Mock Firebase dependencies effectively.
+    *   **Unit Tests for ViewModels & Repositories:** Write comprehensive unit tests for the newly created `ViewModel`s and `Repository`s (e.g., `MainViewModel`, `EmergencyRequestViewModel`, `DonationCentersViewModel`, `FirebaseUserRepository`, `FirebaseEmergencyRequestRepository`, `FirebaseDonationCenterRepository`). Focus on business logic and data transformations. Mock Firebase dependencies effectively.
     *   **UI Tests with Espresso/Compose Testing:** Develop robust end-to-end UI tests to validate critical user flows (e.g., user registration, emergency request creation, donation scheduling, chat). Ensure UI elements are correctly displayed and interactions work as expected.
 
 ## 5. Modernize Lifecycle and Asynchronous Operations (Partially Completed)
 
 **Category:** Modernize Thoughtfully
 
-*   **Description:** Adopt modern Android APIs for lifecycle management and asynchronous task execution to improve robustness and performance. Kotlin Flows have already been integrated into `FirebaseUserRepository`, `FirebaseDonationAppointmentRepository`, `FirebaseDonationCenterRepository`, and `FirebaseDonorHealthRepository`, and are being consumed by `MainViewModel`, `MyAppointmentsViewModel`, `DonationCentersViewModel`, and `DonorHealthViewModel` for reactive data streams from both Realtime Database and Firestore.
+*   **Description:** Adopt modern Android APIs for lifecycle management and asynchronous task execution to improve robustness and performance. Kotlin Flows have already been integrated into `FirebaseUserRepository`, `FirebaseEmergencyRequestRepository`, `FirebaseDonationCenterRepository`, `FirebaseDonationAppointmentRepository`, and `FirebaseDonorHealthRepository`, and are being consumed by `MainViewModel`, `EmergencyRequestViewModel`, `DonationCentersViewModel`, `MyAppointmentsViewModel`, and `DonorHealthViewModel` for reactive data streams from both Realtime Database and Firestore. Modern Android `registerForActivityResult` is also in use for permission handling.
 *   **Next Steps:**
     *   **Utilize Kotlin Coroutines:** Continue to replace manual `ValueEventListener` management in other ViewModels with Flows and Coroutines for more structured concurrency and simplified asynchronous programming, especially for real-time Firebase updates.
     *   **Implement WorkManager:** For background tasks like `DonationReminderService`, transition to WorkManager for reliable, deferrable execution that respects device health and battery life. This will involve refactoring `DonationReminderService` to use WorkManager.
