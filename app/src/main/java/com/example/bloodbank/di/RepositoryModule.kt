@@ -10,6 +10,10 @@ import com.example.bloodbank.repository.DonorHealthRepository
 import com.example.bloodbank.repository.FirebaseDonorHealthRepository
 import com.example.bloodbank.repository.EmergencyRequestRepository
 import com.example.bloodbank.repository.FirebaseEmergencyRequestRepository
+import com.example.bloodbank.repository.MessageRepository
+import com.example.bloodbank.repository.FirebaseMessageRepository
+import com.example.bloodbank.repository.NotificationRepository
+import com.example.bloodbank.repository.FirebaseNotificationRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -49,4 +53,16 @@ abstract class RepositoryModule {
     abstract fun bindEmergencyRequestRepository(
         firebaseEmergencyRequestRepository: FirebaseEmergencyRequestRepository
     ): EmergencyRequestRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindMessageRepository(
+        firebaseMessageRepository: FirebaseMessageRepository
+    ): MessageRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNotificationRepository(
+        firebaseNotificationRepository: FirebaseNotificationRepository
+    ): NotificationRepository
 }
