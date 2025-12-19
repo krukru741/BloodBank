@@ -42,18 +42,9 @@ class BadgeAdapter(private var badges: List<String> = emptyList()) :
         fun bind(badgeName: String) {
             badgeNameText.text = badgeName
             
-            // Set badge icon based on name
-            val iconRes = when (badgeName) {
-                "First Blood" -> R.drawable.ic_badge_first
-                "Regular Donor" -> R.drawable.ic_badge_regular
-                "Streak Master" -> R.drawable.ic_badge_streak
-                "Emergency Hero" -> R.drawable.ic_badge_emergency
-                "Blood Guardian" -> R.drawable.ic_badge_guardian
-                "Blood Champion" -> R.drawable.ic_badge_champion
-                "Blood Legend" -> R.drawable.ic_badge_legend
-                else -> R.drawable.ic_badge_default
-            }
-            badgeIcon.setImageResource(iconRes)
+            // Use Android's built-in star icon for all badges
+            // TODO: Add custom badge icons to res/drawable
+            badgeIcon.setImageResource(android.R.drawable.btn_star_big_on)
         }
     }
 }

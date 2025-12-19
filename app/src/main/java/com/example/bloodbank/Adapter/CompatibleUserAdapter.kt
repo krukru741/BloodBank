@@ -20,7 +20,7 @@ class CompatibleUserAdapter(private var users: List<CompatibleUser> = emptyList(
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CompatibleUserViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_compatible_user, parent, false)
+            .inflate(R.layout.item_user, parent, false)
         return CompatibleUserViewHolder(view)
     }
     
@@ -46,12 +46,12 @@ class CompatibleUserAdapter(private var users: List<CompatibleUser> = emptyList(
         
         fun bind(user: CompatibleUser) {
             nameText.text = user.name
-            bloodGroupText.text = "Blood Group: ${user.bloodgroup}"
+            bloodGroupText.text = "Blood Group: ${user.bloodGroup}"
             addressText.text = user.address
             
             callButton.setOnClickListener {
                 val intent = Intent(Intent.ACTION_DIAL).apply {
-                    data = Uri.parse("tel:${user.phonenumber}")
+                    data = Uri.parse("tel:${user.phoneNumber}")
                 }
                 itemView.context.startActivity(intent)
             }

@@ -19,7 +19,7 @@ class DonationCenterPickerAdapter(
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CenterViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_donation_center, parent, false)
+            .inflate(R.layout.item_center_picker, parent, false)
         return CenterViewHolder(view)
     }
     
@@ -38,14 +38,14 @@ class DonationCenterPickerAdapter(
     }
     
     inner class CenterViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val centerNameText: TextView = itemView.findViewById(R.id.centerNameText)
-        private val addressText: TextView = itemView.findViewById(R.id.addressText)
-        private val hoursText: TextView = itemView.findViewById(R.id.hoursText)
+        private val nameText: TextView = itemView.findViewById(R.id.textViewName)
+        private val addressText: TextView = itemView.findViewById(R.id.textViewAddress)
+        private val cityText: TextView = itemView.findViewById(R.id.textViewCity)
         
         fun bind(center: DonationCenter) {
-            centerNameText.text = center.name
+            nameText.text = center.name
             addressText.text = center.address
-            hoursText.text = "Hours: ${center.operatingHours}"
+            cityText.text = center.city
             
             itemView.setOnClickListener {
                 onCenterSelected(center)
