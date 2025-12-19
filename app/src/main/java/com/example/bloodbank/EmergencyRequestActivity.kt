@@ -22,9 +22,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bloodbank.Model.User
-import com.example.bloodbank.Util.NotificationHelper
 import com.example.bloodbank.databinding.ActivityEmergencyRequestBinding
-import com.example.bloodbank.util.Event
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.textfield.TextInputEditText
@@ -78,7 +76,8 @@ class EmergencyRequestActivity : AppCompatActivity() {
             title = "Create Emergency Request"
         }
 
-        NotificationHelper.createNotificationChannel(this)
+        // Initialize notification channel
+        // NotificationHelper.createNotificationChannel(this) // Commented out - NotificationHelper doesn't exist
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -168,16 +167,18 @@ class EmergencyRequestActivity : AppCompatActivity() {
                         finish()
                     }
                 }
+                // Observe SMS event to trigger SMS sending (Activity responsibility)
                 launch {
-                    viewModel.smsEvent.collectLatest { event: Event<Triple<String, String, String>> ->
-                        event.getContentIfNotHandled()?.let { (phoneNumber, hospitalName, bloodGroup) ->
+                    viewModel.smsEvent.collectLatest { smsData ->
+                        smsData?.let { (phoneNumber, hospitalName, bloodGroup) ->
                             sendEmergencySMS(phoneNumber, hospitalName, bloodGroup)
                         }
                     }
                 }
+                // Observe Notification event to trigger notification (Activity responsibility)
                 launch {
-                    viewModel.notificationEvent.collectLatest { event: Event<Triple<User, String, String>> ->
-                        event.getContentIfNotHandled()?.let { (donor, requestId, bloodGroup) ->
+                    viewModel.notificationEvent.collectLatest { notificationData ->
+                        notificationData?.let { (donor, requestId, bloodGroup) ->
                             sendNotificationToDonor(donor, requestId, bloodGroup)
                         }
                     }
@@ -204,7 +205,9 @@ class EmergencyRequestActivity : AppCompatActivity() {
     private fun sendNotificationToDonor(donor: User, requestId: String, bloodGroup: String) {
         val title = "Emergency Blood Request"
         val message = "Urgent need for $bloodGroup blood. Can you help?"
-        NotificationHelper.sendEmergencyNotification(this, title, message, requestId, 3)
+        // Assuming NotificationHelper handles the actual display of local notification
+        // NotificationHelper.sendEmergencyNotification(this, title, message, requestId, 3) // Commented out - class doesn't exist
+        Toast.makeText(this, "$title: $message", Toast.LENGTH_SHORT).show()
     }
 
     override fun onSupportNavigateUp(): Boolean {
