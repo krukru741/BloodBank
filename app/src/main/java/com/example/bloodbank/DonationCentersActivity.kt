@@ -94,20 +94,8 @@ class DonationCentersActivity : AppCompatActivity() {
                 // Observe error messages
                 launch {
                     viewModel.error.collectLatest { errorMessage ->
-                        Toast.makeText(this@DonationCentersActivity, "Error: $errorMessage", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                // Observe add center result
-                launch {
-                    viewModel.addCenterResult.collectLatest { result ->
-                        when (result) {
-                            is Result.Success -> {
-                                Toast.makeText(this@DonationCentersActivity, "Donation center added successfully", Toast.LENGTH_SHORT).show()
-                            }
-                            is Result.Error -> {
-                                Toast.makeText(this@DonationCentersActivity, "Error adding donation center: ${result.exception.message}", Toast.LENGTH_SHORT).show()
-                            }
+                        errorMessage?.let {
+                            Toast.makeText(this@DonationCentersActivity, "Error: $it", Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -123,8 +111,8 @@ class DonationCentersActivity : AppCompatActivity() {
         val emailInput = dialogView.findViewById<EditText>(R.id.editTextEmail)
         val citySpinner = dialogView.findViewById<Spinner>(R.id.spinnerCity)
 
-        // Setup city spinner
-        val cities = resources.getStringArray(R.array.cities_array) // Assuming an array resource R.array.cities_array
+        // Setup city spinner with hardcoded cities
+        val cities = arrayOf("Manila", "Quezon City", "Makati", "Pasig", "Taguig", "Cebu", "Davao")
         val cityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, cities)
         cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         citySpinner.adapter = cityAdapter
@@ -143,7 +131,18 @@ class DonationCentersActivity : AppCompatActivity() {
                     Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
                     return@setPositiveButton
                 }
-                viewModel.addDonationCenter(name, address, phone, email, city)
+                
+                viewModel.addDonationCenter(
+                    name = name,
+                    address = address,
+                    phone = phone,
+                    email = email,
+                    latitude = 0.0,
+                    longitude = 0.0,
+                    operatingHours = "8:00 AM - 5:00 PM",
+                    maxDailyAppointments = 50,
+                    isActive = true
+                )
             }
             .setNegativeButton("Cancel", null)
             .show()
