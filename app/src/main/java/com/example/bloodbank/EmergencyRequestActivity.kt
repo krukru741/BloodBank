@@ -148,38 +148,50 @@ class EmergencyRequestActivity : AppCompatActivity() {
     private fun observeViewModel() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Observe loading state
                 launch {
-                    viewModel.isLoading.collectLatest { isLoading ->
-                        binding.root.findViewById<ProgressBar>(R.id.progressBar)?.visibility = if (isLoading) View.VISIBLE else View.GONE
+                    viewModel.isLoading.collectLatest { isLoading: Boolean ->
+                        binding.root.findViewById<ProgressBar>(R.id.progressBar)?.visibility =
+                            if (isLoading) View.VISIBLE else View.GONE
                         binding.submitRequestButton.isEnabled = !isLoading
                     }
                 }
+
+                // Observe error messages
                 launch {
-                    viewModel.errorMessage.collectLatest { message ->
+                    viewModel.errorMessage.collectLatest { message: String? ->
                         message?.let {
                             Toast.makeText(this@EmergencyRequestActivity, it, Toast.LENGTH_LONG).show()
                         }
                     }
                 }
+
+                // Observe request creation success
                 launch {
-                    viewModel.requestCreationSuccess.collectLatest {
-                        Toast.makeText(this@EmergencyRequestActivity, "Emergency request submitted successfully!", Toast.LENGTH_SHORT).show()
+                    viewModel.requestCreationSuccess.collectLatest { _: Unit ->
+                        Toast.makeText(
+                            this@EmergencyRequestActivity,
+                            "Emergency request submitted successfully!",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         finish()
                     }
                 }
-                // Observe SMS event to trigger SMS sending (Activity responsibility)
+
+                // Observe SMS events
                 launch {
-                    viewModel.smsEvent.collectLatest { smsData ->
-                        smsData?.let { (phoneNumber, hospitalName, bloodGroup) ->
-                            sendEmergencySMS(phoneNumber, hospitalName, bloodGroup)
+                    viewModel.smsEvent.collectLatest { smsData: Triple<String, String, String>? ->
+                        smsData?.let { data ->
+                            sendEmergencySMS(data.first, data.second, data.third)
                         }
                     }
                 }
-                // Observe Notification event to trigger notification (Activity responsibility)
+
+                // Observe notification events
                 launch {
-                    viewModel.notificationEvent.collectLatest { notificationData ->
-                        notificationData?.let { (donor, requestId, bloodGroup) ->
-                            sendNotificationToDonor(donor, requestId, bloodGroup)
+                    viewModel.notificationEvent.collectLatest { notificationData: Triple<User, String, String>? ->
+                        notificationData?.let { data ->
+                            sendNotificationToDonor(data.first, data.second, data.third)
                         }
                     }
                 }
