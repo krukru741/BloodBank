@@ -40,15 +40,15 @@ class AppointmentsAdapter(private var appointments: List<DonationAppointment> = 
     }
     
     inner class AppointmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val centerNameText: TextView = itemView.findViewById(R.id.centerNameText)
-        private val dateText: TextView = itemView.findViewById(R.id.dateText)
-        private val timeSlotText: TextView = itemView.findViewById(R.id.timeSlotText)
-        private val statusText: TextView = itemView.findViewById(R.id.statusText)
+        private val centerText: TextView = itemView.findViewById(R.id.textViewCenter)
+        private val dateTimeText: TextView = itemView.findViewById(R.id.textViewDateTime)
+        private val statusText: TextView = itemView.findViewById(R.id.textViewStatus)
         
         fun bind(appointment: DonationAppointment) {
-            centerNameText.text = appointment.centerName
-            dateText.text = dateFormat.format(Date(appointment.appointmentDate))
-            timeSlotText.text = appointment.timeSlot
+            centerText.text = appointment.centerName
+            // Combine date and time slot into one field
+            val dateStr = dateFormat.format(Date(appointment.appointmentDate))
+            dateTimeText.text = "$dateStr - ${appointment.timeSlot}"
             statusText.text = appointment.status
             
             // Set status color

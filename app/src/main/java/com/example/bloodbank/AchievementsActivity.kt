@@ -43,11 +43,13 @@ class AchievementsActivity : AppCompatActivity() {
     
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
-        totalPointsText = findViewById(R.id.totalPointsText)
+        // Fixed: ID was totalPointsText in code but pointsText in XML
+        totalPointsText = findViewById(R.id.pointsText)
         rankText = findViewById(R.id.rankText)
         streakText = findViewById(R.id.streakText)
         badgesRecyclerView = findViewById(R.id.badgesRecyclerView)
-        leaderboardRecyclerView = findViewById(R.id.leaderboardRecyclerView)
+        // Fixed: ID was leaderboardRecyclerView in code but achievementsRecyclerView in XML
+        leaderboardRecyclerView = findViewById(R.id.achievementsRecyclerView)
     }
     
     private fun setupToolbar() {
@@ -73,12 +75,13 @@ class AchievementsActivity : AppCompatActivity() {
             .addOnSuccessListener { document ->
                 val achievement = document.toObject(DonorAchievement::class.java)
                 achievement?.let {
-                    totalPointsText.text = "Total Points: ${it.totalPoints}"
-                    rankText.text = "Rank: #${it.rank}"
-                    streakText.text = "Streak: ${it.donationStreak} donations"
+                    totalPointsText.text = it.totalPoints.toString()
+                    rankText.text = "#${it.rank}"
+                    streakText.text = it.donationStreak.toString()
                     
-                    // Setup badges adapter
-                    val badgeAdapter = BadgeAdapter(it.badges)
+                    // Fixed: Converted Map to List<String> to match BadgeAdapter constructor
+                    val earnedBadges = it.badges.filter { entry -> entry.value }.keys.toList()
+                    val badgeAdapter = BadgeAdapter(earnedBadges)
                     badgesRecyclerView.adapter = badgeAdapter
                 }
             }
