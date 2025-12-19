@@ -111,6 +111,26 @@ class FirebaseUserRepository @Inject constructor(
         }
     }
 
+    override fun addUser(user: User): Flow<Result<Unit>> = callbackFlow {
+        val userId = user.id ?: run {
+            trySend(Result.Error(Exception("User ID cannot be null")))
+            close()
+            return@callbackFlow
+        }
+
+        databaseHelper.getUsersReference().child(userId).setValue(user)
+            .addOnSuccessListener {
+                trySend(Result.Success(Unit))
+                close()
+            }
+            .addOnFailureListener { exception ->
+                trySend(Result.Error(exception))
+                close()
+            }
+
+        awaitClose { }
+    }
+
     override fun logout() {
         firebaseAuth.signOut()
     }

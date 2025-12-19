@@ -51,6 +51,13 @@ interface UserRepository {
     fun readRecipients(): Flow<List<User>>
 
     /**
+     * Adds a new user to the database.
+     * @param user The user object to add.
+     * @return A Flow emitting Result with Unit on success or Error on failure.
+     */
+    fun addUser(user: User): Flow<Result<Unit>>
+
+    /**
      * Signs out the current user from the authentication system.
      */
     fun logout()
