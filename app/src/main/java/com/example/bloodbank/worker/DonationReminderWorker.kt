@@ -71,9 +71,10 @@ class DonationReminderWorker @AssistedInject constructor(
         if (appointment.status != "SCHEDULED") return
         
         // Get donation center details
+        val centerId = appointment.centerId ?: return
         val centerSnapshot = db.reference
             .child("donation_centers")
-            .child(appointment.centerId)
+            .child(centerId)
             .get()
             .await()
         

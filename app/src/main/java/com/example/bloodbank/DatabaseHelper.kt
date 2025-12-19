@@ -83,6 +83,15 @@ class DatabaseHelper @Inject constructor(
         return getDonorDonationsReference(donorId).child(donationId)
     }
 
+    // Donation Centers Collection
+    fun getDonationCentersReference(): DatabaseReference {
+        return databaseReference.child("donation_centers")
+    }
+
+    fun getDonationCenterReference(centerId: String): DatabaseReference {
+        return getDonationCentersReference().child(centerId)
+    }
+
     // Storage References
     fun getProfileImagesReference(): StorageReference {
         return storageReference.child("profile_images")

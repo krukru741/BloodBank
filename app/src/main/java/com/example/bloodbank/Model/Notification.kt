@@ -11,8 +11,6 @@ data class Notification(
     val userId: String = "",
     val message: String = "",
     val time: String = "",
-    val isRead: Boolean = false
-) {
-    // Required empty constructor for Firebase
-    constructor() : this("", "", "", false)
-}
+    val isRead: Boolean = false,
+    val id: String = ""
+)

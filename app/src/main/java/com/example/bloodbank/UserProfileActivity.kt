@@ -111,9 +111,9 @@ class UserProfileActivity : AppCompatActivity() {
         // Set text fields
         nameText.text = user.name ?: "Unknown"
         emailText.text = "Email: ${user.email ?: "Not provided"}"
-        phoneText.text = "Phone: ${user.phonenumber ?: "Not provided"}"
+        phoneText.text = "Phone: ${user.phoneNumber ?: "Not provided"}"
         addressText.text = "Address: ${user.address ?: "Not provided"}"
-        bloodgroupText.text = "Blood Group: ${user.bloodgroup ?: "Not specified"}"
+        bloodgroupText.text = "Blood Group: ${user.bloodGroup ?: "Not specified"}"
         typeText.text = user.type ?: "User"
         genderText.text = "Gender: ${user.gender ?: "Not specified"}"
         

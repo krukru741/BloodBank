@@ -9,10 +9,7 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class FirebaseDonorHealthRepository @Inject constructor(
     private val databaseHelper: DatabaseHelper,
@@ -39,25 +36,31 @@ class FirebaseDonorHealthRepository @Inject constructor(
         awaitClose { healthRef.removeEventListener(listener) }
     }
 
-    override suspend fun updateDonorHealth(donorId: String, donorHealth: DonorHealth): Result<Unit> = suspendCoroutine { continuation ->
+    override fun updateDonorHealth(donorId: String, donorHealth: DonorHealth): Flow<Result<Unit>> = callbackFlow {
         val healthRef = databaseHelper.getUserHealthReference(donorId)
         healthRef.setValue(donorHealth)
             .addOnSuccessListener {
-                continuation.resume(Result.Success(Unit))
+                trySend(Result.Success(Unit))
+                close()
             }
             .addOnFailureListener { e ->
-                continuation.resume(Result.Error(e))
+                trySend(Result.Error(e))
+                close()
             }
+        awaitClose { }
     }
 
-    override suspend fun createDonorHealth(donorId: String, donorHealth: DonorHealth): Result<Unit> = suspendCoroutine { continuation ->
+    override fun createDonorHealth(donorId: String, donorHealth: DonorHealth): Flow<Result<Unit>> = callbackFlow {
         val healthRef = databaseHelper.getUserHealthReference(donorId)
         healthRef.setValue(donorHealth)
             .addOnSuccessListener {
-                continuation.resume(Result.Success(Unit))
+                trySend(Result.Success(Unit))
+                close()
             }
             .addOnFailureListener { e ->
-                continuation.resume(Result.Error(e))
+                trySend(Result.Error(e))
+                close()
             }
+        awaitClose { }
     }
 }
