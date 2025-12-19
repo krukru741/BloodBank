@@ -78,4 +78,13 @@ class MyAppointmentsViewModel @Inject constructor(
                 }
         }
     }
+
+    /**
+     * Clear the current error message.
+     */
+    fun clearError() {
+        // SharedFlow doesn't hold state, but we can provide this for consistency
+        // with other ViewModels if needed, or simply do nothing as SharedFlow
+        // events are "fire and forget".
+    }
 }

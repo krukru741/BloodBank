@@ -193,11 +193,11 @@ class RecipientRegistrationActivity : AppCompatActivity() {
             name = fullNameInput.text.toString().trim(),
             email = emailInput.text.toString().trim(),
             idnumber = idNumberInput.text.toString().trim(),
-            phonenumber = phoneInput.text.toString().trim(),
+            phoneNumber = phoneInput.text.toString().trim(),
             address = addressInput.text.toString().trim(),
             birthdate = birthdateInput.text.toString().trim(),
             gender = genderSpinner.text.toString(),
-            bloodgroup = bloodGroupSpinner.text.toString(),
+            bloodGroup = bloodGroupSpinner.text.toString(),
             type = "recipient",
             search = "recipient${bloodGroupSpinner.text}",
             profileImagePath = currentPhotoFile?.absolutePath ?: ""

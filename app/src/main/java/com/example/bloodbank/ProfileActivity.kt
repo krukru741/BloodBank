@@ -141,10 +141,10 @@ class ProfileActivity : AppCompatActivity() {
         // Set text fields with labels
         nameText.text = user.name ?: ""
         emailText.text = "Email: ${user.email ?: ""}"
-        phoneText.text = "Phone: ${user.phonenumber ?: ""}"
+        phoneText.text = "Phone: ${user.phoneNumber ?: ""}"
         addressText.text = "Address: ${user.address ?: ""}"
         birthdateText.text = "Birthdate: ${user.birthdate ?: ""}"
-        bloodgroupText.text = "Blood Group: ${user.bloodgroup ?: ""}"
+        bloodgroupText.text = "Blood Group: ${user.bloodGroup ?: ""}"
         typeText.text = user.type ?: ""
         genderText.text = "Gender: ${user.gender ?: ""}"
         idNumberText.text = "ID Number: ${user.idnumber ?: ""}"
