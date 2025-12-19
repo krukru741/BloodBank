@@ -3,7 +3,6 @@ package com.example.bloodbank.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bloodbank.Model.User
-import com.example.bloodbank.repository.Result
 import com.example.bloodbank.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -12,6 +11,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -48,29 +48,34 @@ class MainViewModel @Inject constructor(
             val userId = userRepository.getCurrentUserUid()
             if (userId != null) {
                 // Collect current user details
-                userRepository.getUserDetails(userId).collectLatest { result ->
-                    when (result) {
-                        is Result.Success -> _currentUser.value = result.data
-                        is Result.Error -> _error.emit(result.exception.message ?: "Failed to load user details")
-                    }
+                launch {
+                    userRepository.getUserDetails(userId)
+                        .catch { e -> 
+                            _error.emit(e.message ?: "Failed to load user details")
+                        }
+                        .collectLatest { user ->
+                            _currentUser.value = user
+                        }
                 }
 
                 // Collect user type
-                userRepository.getUserType(userId).collectLatest { result ->
-                    when (result) {
-                        is Result.Success -> {
-                            _userType.value = result.data
-                            _isLoading.value = false // Set loading to false after user type is known
-                            checkUserTypeAndLoadContent()
-                        }
-                        is Result.Error -> {
-                            _error.emit(result.exception.message ?: "Failed to load user type")
+                launch {
+                    userRepository.getUserType(userId)
+                        .catch { e ->
+                            _error.emit(e.message ?: "Failed to load user type")
                             _isLoading.value = false
                         }
-                    }
+                        .collectLatest { type ->
+                            _userType.value = type
+                            if (type != null) {
+                                _isLoading.value = false
+                                checkUserTypeAndLoadContent()
+                            } else {
+                                _isLoading.value = false
+                            }
+                        }
                 }
             } else {
-                // User not logged in, trigger logout or handle appropriately
                 _error.emit("User not logged in.")
                 _logoutEvent.emit(Unit)
                 _isLoading.value = false
@@ -82,44 +87,35 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             when (_userType.value) {
-                "donor" -> readRecipients() // Donor sees recipients
-                "recipient" -> readDonors() // Recipient sees donors
-                else -> {
-                    // Handle unknown user type or initial state
-                    _isLoading.value = false
-                }
+                "donor" -> readRecipients()
+                "recipient" -> readDonors()
+                else -> _isLoading.value = false
             }
         }
     }
 
     private suspend fun readDonors() {
-        userRepository.readDonors().collectLatest { result ->
-            when (result) {
-                is Result.Success -> {
-                    _donors.value = result.data ?: emptyList()
-                    _isLoading.value = false
-                }
-                is Result.Error -> {
-                    _error.emit(result.exception.message ?: "Failed to load donors")
-                    _isLoading.value = false
-                }
+        userRepository.readDonors()
+            .catch { e ->
+                _error.emit(e.message ?: "Failed to load donors")
+                _isLoading.value = false
             }
-        }
+            .collectLatest { donorsList ->
+                _donors.value = donorsList
+                _isLoading.value = false
+            }
     }
 
     private suspend fun readRecipients() {
-        userRepository.readRecipients().collectLatest { result ->
-            when (result) {
-                is Result.Success -> {
-                    _recipients.value = result.data ?: emptyList()
-                    _isLoading.value = false
-                }
-                is Result.Error -> {
-                    _error.emit(result.exception.message ?: "Failed to load recipients")
-                    _isLoading.value = false
-                }
+        userRepository.readRecipients()
+            .catch { e ->
+                _error.emit(e.message ?: "Failed to load recipients")
+                _isLoading.value = false
             }
-        }
+            .collectLatest { recipientsList ->
+                _recipients.value = recipientsList
+                _isLoading.value = false
+            }
     }
 
     fun logout() {

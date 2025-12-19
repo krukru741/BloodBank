@@ -2,6 +2,7 @@ package com.example.bloodbank
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -29,8 +30,8 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var emailInput: TextInputEditText
     private lateinit var passwordInput: TextInputEditText
     private lateinit var loginButton: MaterialButton
-    private lateinit var forgotPasswordButton: MaterialButton
-    private lateinit var registerButton: MaterialButton
+    private lateinit var forgotPasswordButton: TextView
+    private lateinit var registerButton: TextView
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,11 +56,11 @@ class LoginActivity : AppCompatActivity() {
     private fun initializeViews() {
         emailLayout = findViewById(R.id.emailLayout)
         passwordLayout = findViewById(R.id.passwordLayout)
-        emailInput = findViewById(R.id.emailInput)
-        passwordInput = findViewById(R.id.passwordInput)
+        emailInput = findViewById(R.id.loginEmail)
+        passwordInput = findViewById(R.id.loginPassword)
         loginButton = findViewById(R.id.loginButton)
-        forgotPasswordButton = findViewById(R.id.forgotPasswordButton)
-        registerButton = findViewById(R.id.registerButton)
+        forgotPasswordButton = findViewById(R.id.forgotPassword)
+        registerButton = findViewById(R.id.backButton)
     }
     
     private fun setupClickListeners() {
@@ -112,7 +113,7 @@ class LoginActivity : AppCompatActivity() {
                 launch {
                     viewModel.isLoading.collect { isLoading ->
                         loginButton.isEnabled = !isLoading
-                        loginButton.text = if (isLoading) "Logging in..." else "Login"
+                        loginButton.text = if (isLoading) "Logging in..." else "SIGN IN NOW"
                     }
                 }
                 
@@ -145,6 +146,7 @@ class LoginActivity : AppCompatActivity() {
     }
     
     override fun onBackPressed() {
+        super.onBackPressed()
         // Prevent going back to previous screen
         finishAffinity()
     }

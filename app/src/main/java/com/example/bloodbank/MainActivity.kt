@@ -1,15 +1,14 @@
 package com.example.bloodbank
 
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -23,20 +22,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.bloodbank.Adapter.UserAdapter
 import com.example.bloodbank.Model.User
-import com.example.bloodbank.Service.DonationReminderService
+import com.example.bloodbank.worker.DonationReminderScheduler
 import com.example.bloodbank.utils.GooglePlayServicesUtils
+import com.example.bloodbank.viewmodel.MainViewModel
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject // Keep if other @Inject fields exist, otherwise remove
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    // MainViewModel injection
     private val mainViewModel: MainViewModel by viewModels()
 
     private lateinit var drawerLayout: DrawerLayout
@@ -66,10 +64,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Check for Google Play Services
         checkGooglePlayServices()
 
-        // Initialize Toolbar
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
@@ -90,23 +86,19 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         progressbar = findViewById(R.id.progressbar)
 
         recycleView = findViewById(R.id.recycleView)
-        val layoutManager = LinearLayoutManager(this)
-        layoutManager.reverseLayout = true
-        layoutManager.stackFromEnd = true
-        recycleView.layoutManager = layoutManager
+        recycleView.layoutManager = LinearLayoutManager(this).apply {
+            reverseLayout = true
+            stackFromEnd = true
+        }
 
         userList = ArrayList()
-        userAdapter = UserAdapter(this, userList)
+        userAdapter = UserAdapter(userList)
         recycleView.adapter = userAdapter
 
-        // Set up FAB visibility and click listener
-        fabEmergency.visibility = View.GONE // Hide by default, will be made visible based on user type later
+        fabEmergency.visibility = View.GONE
         fabEmergency.setOnClickListener { startEmergencyRequest() }
 
-        // Observe ViewModel data
         observeViewModel()
-
-        // Initialize user data and content based on user type
         mainViewModel.checkUserTypeAndLoadContent()
     }
 
@@ -117,9 +109,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     mainViewModel.currentUser.collectLatest { user ->
                         user?.let {
                             updateNavigationHeader(it)
-                            // Re-check donation eligibility if user is a donor
                             if (it.type == "donor") {
-                                DonationReminderService(this@MainActivity).checkAndUpdateEligibility()
+                                // DonationReminderScheduler.scheduleReminder(this@MainActivity)
                             }
                         }
                     }
@@ -129,10 +120,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         type?.let {
                             if (it == "donor") {
                                 showDonorInfo()
-                                fabEmergency.visibility = View.GONE // Donors don't create emergency requests via FAB
+                                fabEmergency.visibility = View.GONE
                             } else {
                                 showRecipientInfo()
-                                fabEmergency.visibility = View.VISIBLE // Recipients create emergency requests via FAB
+                                fabEmergency.visibility = View.VISIBLE
                             }
                         }
                     }
@@ -143,7 +134,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         userList.addAll(donors)
                         userAdapter.notifyDataSetChanged()
                         progressbar.visibility = View.GONE
-                        if (donors.isEmpty()) {
+                        if (donors.isEmpty() && mainViewModel.userType.value == "recipient") {
                             Toast.makeText(this@MainActivity, "No Donors available", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -154,7 +145,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         userList.addAll(recipients)
                         userAdapter.notifyDataSetChanged()
                         progressbar.visibility = View.GONE
-                        if (recipients.isEmpty()) {
+                        if (recipients.isEmpty() && mainViewModel.userType.value == "donor") {
                             Toast.makeText(this@MainActivity, "No Recipients available", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -165,13 +156,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     }
                 }
                 launch {
-                    mainViewModel.logoutEvent.collectLatest { loggedOut ->
-                        if (loggedOut) {
-                            val intent = Intent(this@MainActivity, LoginActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            finish()
-                        }
+                    mainViewModel.logoutEvent.collectLatest {
+                        val intent = Intent(this@MainActivity, LoginActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        startActivity(intent)
+                        finish()
                     }
                 }
             }
@@ -190,7 +179,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         additionalInfoSection = headerView.findViewById(R.id.additional_info_section)
         donorInfo = headerView.findViewById(R.id.donor_info)
-recipientInfo = headerView.findViewById(R.id.recipient_info)
+        recipientInfo = headerView.findViewById(R.id.recipient_info)
         navLastDonation = headerView.findViewById(R.id.nav_last_donation)
         navLastRequest = headerView.findViewById(R.id.nav_last_request)
 
@@ -205,11 +194,7 @@ recipientInfo = headerView.findViewById(R.id.recipient_info)
             navLastDonation.text = user.lastDonationDate ?: "N/A"
         } else {
             showRecipientInfo()
-            // Assuming lastRequest for recipient is available in User model or needs another fetch
-            // For now, mirroring the original logic, which assumed it's part of the user snapshot.
-            // If it's a separate field, ViewModel should provide it.
-            // Placeholder:
-            navLastRequest.text = user.lastRequestDate ?: "N/A" // Assuming a field `lastRequestDate` in User model
+            navLastRequest.text = "N/A"
         }
 
         user.profileImagePath?.let { path ->
@@ -247,9 +232,7 @@ recipientInfo = headerView.findViewById(R.id.recipient_info)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val itemId = item.itemId
-
-        when (itemId) {
+        when (item.itemId) {
             R.id.emergency_request -> {
                 val userType = mainViewModel.userType.value
                 val intent: Intent = if (userType == "recipient") {
@@ -265,75 +248,31 @@ recipientInfo = headerView.findViewById(R.id.recipient_info)
             R.id.schedule_donation -> startActivity(Intent(this, ScheduleDonationActivity::class.java))
             R.id.my_appointments -> startActivity(Intent(this, MyAppointmentsActivity::class.java))
             R.id.donation_centers -> startActivity(Intent(this, DonationCentersActivity::class.java))
-            R.id.aplus -> {
-                val intent = Intent(this, CategorySelectedActivity::class.java)
-                intent.putExtra("group", "A+")
-                startActivity(intent)
-            }
-            R.id.aminus -> {
-                val intent = Intent(this, CategorySelectedActivity::class.java)
-                intent.putExtra("group", "A-")
-                startActivity(intent)
-            }
-            R.id.bplus -> {
-                val intent = Intent(this, CategorySelectedActivity::class.java)
-                intent.putExtra("group", "B+")
-                startActivity(intent)
-            }
-            R.id.bminus -> {
-                val intent = Intent(this, CategorySelectedActivity::class.java)
-                intent.putExtra("group", "B-")
-                startActivity(intent)
-            }
-            R.id.abplus -> {
-                val intent = Intent(this, CategorySelectedActivity::class.java)
-                intent.putExtra("group", "AB+")
-                startActivity(intent)
-            }
-            R.id.abminus -> {
-                val intent = Intent(this, CategorySelectedActivity::class.java)
-                intent.putExtra("group", "AB-")
-                startActivity(intent)
-            }
-            R.id.oplus -> {
-                val intent = Intent(this, CategorySelectedActivity::class.java)
-                intent.putExtra("group", "O+")
-                startActivity(intent)
-            }
-            R.id.ominus -> {
-                val intent = Intent(this, CategorySelectedActivity::class.java)
-                intent.putExtra("group", "O-")
-                startActivity(intent)
-            }
-            R.id.compatible -> {
-                val intent = Intent(this, CompatibleUsersActivity::class.java)
-                startActivity(intent)
-            }
-            R.id.notifications -> {
-                val intent = Intent(this, NotificationsActivity::class.java)
-                startActivity(intent)
-            }
-            R.id.aboutus -> {
-                val intent = Intent(this, AboutUsActivity::class.java)
-                startActivity(intent)
-            }
-            R.id.Faq -> {
-                val intent = Intent(this, FaqActivity::class.java)
-                startActivity(intent)
-            }
-            R.id.sentEmail -> {
-                val intent = Intent(this, SentEmailActivity::class.java)
-                startActivity(intent)
-            }
+            R.id.aplus -> navigateToCategory("A+")
+            R.id.aminus -> navigateToCategory("A-")
+            R.id.bplus -> navigateToCategory("B+")
+            R.id.bminus -> navigateToCategory("B-")
+            R.id.abplus -> navigateToCategory("AB+")
+            R.id.abminus -> navigateToCategory("AB-")
+            R.id.oplus -> navigateToCategory("O+")
+            R.id.ominus -> navigateToCategory("O-")
+            R.id.compatible -> startActivity(Intent(this, CompatibleUsersActivity::class.java))
+            R.id.notifications -> startActivity(Intent(this, NotificationsActivity::class.java))
+            R.id.aboutus -> startActivity(Intent(this, AboutUsActivity::class.java))
+            R.id.Faq -> startActivity(Intent(this, FaqActivity::class.java))
+            R.id.sentEmail -> startActivity(Intent(this, SentEmailActivity::class.java))
             R.id.logout -> mainViewModel.logout()
-            R.id.profile -> {
-                val intent = Intent(this, ProfileActivity::class.java)
-                startActivity(intent)
-            }
+            R.id.profile -> startActivity(Intent(this, ProfileActivity::class.java))
         }
 
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    private fun navigateToCategory(group: String) {
+        val intent = Intent(this, CategorySelectedActivity::class.java)
+        intent.putExtra("group", group)
+        startActivity(intent)
     }
 
     private fun checkGooglePlayServices() {
@@ -344,8 +283,6 @@ recipientInfo = headerView.findViewById(R.id.recipient_info)
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        // Handle Google Play Services resolution result
         if (requestCode == 9000) {
             if (resultCode == RESULT_OK) {
                 Toast.makeText(this, "Google Play Services is now available", Toast.LENGTH_SHORT).show()
@@ -355,9 +292,13 @@ recipientInfo = headerView.findViewById(R.id.recipient_info)
         }
     }
 
-    // Removed onDestroy listener removal as ViewModel handles Flow collection lifecycle
-    // Note: If DonationReminderService depends on MainActivity's direct Firebase interactions,
-    // it will also need refactoring to use the UserRepository/ViewModel pattern.
+    override fun onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
+        }
+    }
 
     companion object {
         private const val TAG = "MainActivity"

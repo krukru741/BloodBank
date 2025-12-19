@@ -15,18 +15,18 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.example.bloodbank.adapters.AppointmentsAdapter
+import com.example.bloodbank.Adapter.AppointmentsAdapter
+import com.example.bloodbank.Model.DonationAppointment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import com.example.bloodbank.models.DonationAppointment // Using the Kotlin data class
 
 @AndroidEntryPoint
 class MyAppointmentsActivity : AppCompatActivity() {
     private lateinit var appointmentsRecyclerView: RecyclerView
     private lateinit var adapter: AppointmentsAdapter
     private lateinit var swipeRefreshLayout: SwipeRefreshLayout
-    private lateinit var progressBar: ProgressBar // Changed from View to ProgressBar for better type safety
+    private lateinit var progressBar: ProgressBar 
     private lateinit var emptyView: TextView
 
     private val viewModel: MyAppointmentsViewModel by viewModels()
@@ -63,8 +63,8 @@ class MyAppointmentsActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        // Initialize adapter with an empty list. The actual data will come from ViewModel observation.
-        adapter = AppointmentsAdapter(ArrayList()) // Use ArrayList for mutable list
+        // Initialize adapter with an empty list.
+        adapter = AppointmentsAdapter(mutableListOf()) 
         appointmentsRecyclerView.layoutManager = LinearLayoutManager(this)
         appointmentsRecyclerView.adapter = adapter
     }
@@ -81,7 +81,7 @@ class MyAppointmentsActivity : AppCompatActivity() {
                 // Observe appointments
                 launch {
                     viewModel.appointments.collectLatest { appointments ->
-                        adapter.updateList(appointments) // Assuming AppointmentsAdapter has an updateList method
+                        adapter.updateAppointments(appointments) 
                         emptyView.visibility = if (appointments.isEmpty()) View.VISIBLE else View.GONE
                     }
                 }
@@ -105,7 +105,7 @@ class MyAppointmentsActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        onBackPressedDispatcher.onBackPressed() // Modern way to handle back press
+        onBackPressedDispatcher.onBackPressed() 
         return true
     }
 
@@ -118,6 +118,4 @@ class MyAppointmentsActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
-    // onDestroy no longer needs manual listener removal as Flow/ViewModelScope handles it.
 }
