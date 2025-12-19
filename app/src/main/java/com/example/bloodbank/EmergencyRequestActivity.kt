@@ -180,8 +180,8 @@ class EmergencyRequestActivity : AppCompatActivity() {
 
                 // Observe SMS events
                 launch {
-                    viewModel.smsEvent.collectLatest { smsData: Triple<String, String, String>? ->
-                        smsData?.let { data ->
+                    viewModel.smsEvent.collectLatest { smsData: com.example.bloodbank.util.Event<Triple<String, String, String>> ->
+                        smsData.getContentIfNotHandled()?.let { data ->
                             sendEmergencySMS(data.first, data.second, data.third)
                         }
                     }
@@ -189,8 +189,8 @@ class EmergencyRequestActivity : AppCompatActivity() {
 
                 // Observe notification events
                 launch {
-                    viewModel.notificationEvent.collectLatest { notificationData: Triple<User, String, String>? ->
-                        notificationData?.let { data ->
+                    viewModel.notificationEvent.collectLatest { notificationData: com.example.bloodbank.util.Event<Triple<User, String, String>> ->
+                        notificationData.getContentIfNotHandled()?.let { data ->
                             sendNotificationToDonor(data.first, data.second, data.third)
                         }
                     }

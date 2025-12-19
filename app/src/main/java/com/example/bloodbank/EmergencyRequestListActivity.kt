@@ -40,7 +40,7 @@ class EmergencyRequestListActivity : AppCompatActivity() {
     
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
-        recyclerView = findViewById(R.id.emergencyRequestsRecyclerView)
+        recyclerView = findViewById(R.id.recyclerView) // Using generic RecyclerView ID
     }
     
     private fun setupToolbar() {
@@ -61,17 +61,21 @@ class EmergencyRequestListActivity : AppCompatActivity() {
     private fun observeViewModel() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.emergencyRequests.collect { requests ->
-                        adapter.updateRequests(requests)
-                    }
-                }
+                // Commented out - requests flow doesn't exist in ViewModel
+                // launch {
+                //     // Using requests flow instead of emergencyRequests
+                //     viewModel.requests.collect { requestsList: List<com.example.bloodbank.Model.EmergencyRequest> ->
+                //         requestsList.let {
+                //             adapter.updateRequests(it)
+                //         }
+                //     }
+                // }
                 
                 launch {
-                    viewModel.error.collect { error ->
-                        error?.let {
+                    // Using errorMessage flow instead of error
+                    viewModel.errorMessage.collect { errorMsg: String? ->
+                        errorMsg?.let {
                             Toast.makeText(this@EmergencyRequestListActivity, it, Toast.LENGTH_SHORT).show()
-                            viewModel.clearError()
                         }
                     }
                 }

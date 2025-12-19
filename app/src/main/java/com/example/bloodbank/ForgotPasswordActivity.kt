@@ -29,6 +29,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
     private lateinit var emailLayout: TextInputLayout
     private lateinit var emailInput: TextInputEditText
     private lateinit var sendButton: MaterialButton
+    private lateinit var backToLoginButton: MaterialButton
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,8 +51,9 @@ class ForgotPasswordActivity : AppCompatActivity() {
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
         emailLayout = findViewById(R.id.emailLayout)
-        emailInput = findViewById(R.id.emailInput)
-        sendButton = findViewById(R.id.sendButton)
+        emailInput = findViewById(R.id.forgotPass)
+        sendButton = findViewById(R.id.resetButton)
+        backToLoginButton = findViewById(R.id.backToLoginButton)
     }
     
     private fun setupToolbar() {
@@ -71,6 +73,10 @@ class ForgotPasswordActivity : AppCompatActivity() {
             emailLayout.error = null
             
             viewModel.sendPasswordResetEmail(email)
+        }
+        
+        backToLoginButton.setOnClickListener {
+            finish()
         }
     }
     
@@ -103,7 +109,7 @@ class ForgotPasswordActivity : AppCompatActivity() {
                 launch {
                     viewModel.isLoading.collect { isLoading ->
                         sendButton.isEnabled = !isLoading
-                        sendButton.text = if (isLoading) "Sending..." else "Send Reset Email"
+                        sendButton.text = if (isLoading) "Sending..." else "Reset Password"
                     }
                 }
                 

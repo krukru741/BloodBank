@@ -25,5 +25,7 @@ data class User(
     var requiredUnits: Int = 0,
     var urgencyLevel: String? = null,
     var weight: Double = 0.0,
-    var height: Double = 0.0
+    var height: Double = 0.0,
+    var latitude: Double? = null,
+    var longitude: Double? = null
 )
