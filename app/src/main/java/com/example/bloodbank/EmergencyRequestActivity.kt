@@ -23,7 +23,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.bloodbank.Model.User
 import com.example.bloodbank.Util.NotificationHelper
-import com.example.bloodbank.databinding.ActivityEmergencyRequestBinding // Assuming binding is used or will be
+import com.example.bloodbank.databinding.ActivityEmergencyRequestBinding
+import com.example.bloodbank.util.Event
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.textfield.TextInputEditText
@@ -34,13 +35,11 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class EmergencyRequestActivity : AppCompatActivity() {
 
-    // Using view binding for cleaner view access (assuming ActivityEmergencyRequestBinding exists from layout name)
     private lateinit var binding: ActivityEmergencyRequestBinding
 
     private val viewModel: EmergencyRequestViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    // For requesting multiple permissions (Location and SMS)
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -48,19 +47,15 @@ class EmergencyRequestActivity : AppCompatActivity() {
         val smsGranted = permissions[Manifest.permission.SEND_SMS] ?: false
 
         if (fineLocationGranted) {
-            // Permission for location granted, try to get last location
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    // Pass location to ViewModel for submission
                     submitEmergencyRequest(location)
                 }
                 .addOnFailureListener {
-                    // Handle cases where location is not available even with permission
                     Toast.makeText(this, "Could not get current location. Submitting request without it.", Toast.LENGTH_LONG).show()
                     submitEmergencyRequest(null)
                 }
         } else {
-            // Location permission denied, submit without location
             Toast.makeText(this, "Location permission denied, request will be submitted without location data.", Toast.LENGTH_LONG).show()
             submitEmergencyRequest(null)
         }
@@ -73,11 +68,9 @@ class EmergencyRequestActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Initialize view binding
         binding = ActivityEmergencyRequestBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup toolbar
         setSupportActionBar(binding.toolbar)
         supportActionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -85,33 +78,31 @@ class EmergencyRequestActivity : AppCompatActivity() {
             title = "Create Emergency Request"
         }
 
-        // Initialize notification channel (still an Activity responsibility to create)
         NotificationHelper.createNotificationChannel(this)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // Setup blood group dropdown
+        val bloodGroups = arrayOf("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-")
         val bloodGroupAdapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
-            viewModel.BLOOD_GROUPS
+            bloodGroups
         )
         binding.bloodGroupInput.setAdapter(bloodGroupAdapter)
-        binding.bloodGroupInput.keyListener = null // Disable keyboard input
+        binding.bloodGroupInput.keyListener = null
         binding.bloodGroupInput.setOnClickListener { binding.bloodGroupInput.showDropDown() }
 
-        // Setup priority level dropdown
+        val priorityLevels = arrayOf("Critical", "Urgent", "Normal")
         val priorityAdapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_dropdown_item,
-            viewModel.PRIORITY_LEVELS
+            priorityLevels
         )
         binding.priorityLevelInput.setAdapter(priorityAdapter)
-        binding.priorityLevelInput.keyListener = null // Disable keyboard input
+        binding.priorityLevelInput.keyListener = null
         binding.priorityLevelInput.setOnClickListener { binding.priorityLevelInput.showDropDown() }
 
         binding.submitRequestButton.setOnClickListener {
-            // Trigger permission check before submitting
             checkPermissionsAndSubmitRequest()
         }
 
@@ -130,13 +121,11 @@ class EmergencyRequestActivity : AppCompatActivity() {
         if (permissionsToRequest.isNotEmpty()) {
             requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         } else {
-            // All permissions already granted, proceed with getting location and submitting
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
                     submitEmergencyRequest(location)
                 }
                 .addOnFailureListener {
-                    // Handle cases where location is not available even with permission
                     Toast.makeText(this, "Could not get current location. Submitting request without it.", Toast.LENGTH_LONG).show()
                     submitEmergencyRequest(null)
                 }
@@ -151,53 +140,43 @@ class EmergencyRequestActivity : AppCompatActivity() {
             patientName = binding.patientNameInput.text.toString().trim(),
             bloodGroup = binding.bloodGroupInput.text.toString().trim(),
             priorityLevel = binding.priorityLevelInput.text.toString().trim(),
-            unitsNeeded = binding.unitsNeededInput.text.toString().trim().toIntOrNull() ?: 0,
+            unitsNeeded = binding.unitsNeededInput.text.toString().trim(),
             emergencyDetails = binding.emergencyDetailsInput.text.toString().trim(),
-            latitude = location?.latitude,
-            longitude = location?.longitude
+            location = location
         )
     }
 
     private fun observeViewModel() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Observe loading state
                 launch {
                     viewModel.isLoading.collectLatest { isLoading ->
-                        binding.progressbar.visibility = if (isLoading) View.VISIBLE else View.GONE
-                        binding.submitRequestButton.isEnabled = !isLoading // Disable button while loading
+                        binding.root.findViewById<ProgressBar>(R.id.progressBar)?.visibility = if (isLoading) View.VISIBLE else View.GONE
+                        binding.submitRequestButton.isEnabled = !isLoading
                     }
                 }
-                // Observe error messages
                 launch {
                     viewModel.errorMessage.collectLatest { message ->
                         message?.let {
                             Toast.makeText(this@EmergencyRequestActivity, it, Toast.LENGTH_LONG).show()
-                            // Clear error message after showing
-                            viewModel.clearErrorMessage()
                         }
                     }
                 }
-                // Observe request creation success
                 launch {
-                    viewModel.requestCreationSuccess.collectLatest { success ->
-                        if (success) {
-                            Toast.makeText(this@EmergencyRequestActivity, "Emergency request submitted successfully!", Toast.LENGTH_SHORT).show()
-                            finish() // Close activity on success
-                        }
+                    viewModel.requestCreationSuccess.collectLatest {
+                        Toast.makeText(this@EmergencyRequestActivity, "Emergency request submitted successfully!", Toast.LENGTH_SHORT).show()
+                        finish()
                     }
                 }
-                // Observe SMS event to trigger SMS sending (Activity responsibility)
                 launch {
-                    viewModel.smsEvent.collectLatest { event ->
+                    viewModel.smsEvent.collectLatest { event: Event<Triple<String, String, String>> ->
                         event.getContentIfNotHandled()?.let { (phoneNumber, hospitalName, bloodGroup) ->
                             sendEmergencySMS(phoneNumber, hospitalName, bloodGroup)
                         }
                     }
                 }
-                // Observe Notification event to trigger notification (Activity responsibility)
                 launch {
-                    viewModel.notificationEvent.collectLatest { event ->
+                    viewModel.notificationEvent.collectLatest { event: Event<Triple<User, String, String>> ->
                         event.getContentIfNotHandled()?.let { (donor, requestId, bloodGroup) ->
                             sendNotificationToDonor(donor, requestId, bloodGroup)
                         }
@@ -207,11 +186,10 @@ class EmergencyRequestActivity : AppCompatActivity() {
         }
     }
 
-    // Function to handle SMS sending - called from ViewModel event
     private fun sendEmergencySMS(phoneNumber: String, hospitalName: String, bloodGroup: String) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
             try {
-                val smsManager = SmsManager.getDefault() // Note: SmsManager.getDefault() is deprecated in API 31+, consider SmsManager.getSystemSmsManager(Context)
+                val smsManager = SmsManager.getDefault()
                 val message = "EMERGENCY: Blood donation needed at $hospitalName for blood group $bloodGroup. Please respond ASAP."
                 smsManager.sendTextMessage(phoneNumber, null, message, null, null)
                 Toast.makeText(this, "Emergency SMS sent to contact.", Toast.LENGTH_SHORT).show()
@@ -219,22 +197,16 @@ class EmergencyRequestActivity : AppCompatActivity() {
                 Toast.makeText(this, "Failed to send SMS: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         } else {
-            // Should ideally not happen if permission flow is correct, but as a fallback
             Toast.makeText(this, "SMS permission not granted.", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Function to handle sending notification - called from ViewModel event
     private fun sendNotificationToDonor(donor: User, requestId: String, bloodGroup: String) {
         val title = "Emergency Blood Request"
         val message = "Urgent need for $bloodGroup blood. Can you help?"
-
-        // Assuming NotificationHelper handles the actual display of local notification
         NotificationHelper.sendEmergencyNotification(this, title, message, requestId, 3)
-        // Storing notification in Firebase is now handled by the ViewModel via the Repository
     }
 
-    // Handle up navigation (back button in toolbar)
     override fun onSupportNavigateUp(): Boolean {
         onBackPressedDispatcher.onBackPressed()
         return true

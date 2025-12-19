@@ -11,5 +11,6 @@ data class DonationCenter(
     var longitude: Double = 0.0,
     var operatingHours: String? = null,
     var maxDailyAppointments: Int = 0,
-    var isActive: Boolean = false
+    var isActive: Boolean = false,
+    var createdAt: Long? = null
 )
