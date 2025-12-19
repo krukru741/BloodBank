@@ -87,23 +87,20 @@ class AuthViewModel @Inject constructor(
                 _error.value = null
                 
                 // Create Firebase Auth account
-                val result = firebaseAuth.createUserWithEmailAndPassword(user.email, password).await()
+                val result = firebaseAuth.createUserWithEmailAndPassword(user.email ?: "", password).await()
                 
                 if (result.user != null) {
                     // Save user data to database
                     val userWithId = user.copy(id = result.user!!.uid)
-                    userRepository.createUser(userWithId).collect { repoResult ->
+                    userRepository.addUser(userWithId).collect { repoResult ->
                         when (repoResult) {
-                            is UserRepository.Result.Success -> {
+                            is com.example.bloodbank.repository.Result.Success -> {
                                 _authState.value = AuthState.Authenticated(result.user!!)
                                 _currentUser.value = result.user
                             }
-                            is UserRepository.Result.Error -> {
+                            is com.example.bloodbank.repository.Result.Error -> {
                                 _authState.value = AuthState.Error(repoResult.exception.message ?: "Failed to save user data")
                                 _error.value = repoResult.exception.message
-                            }
-                            is UserRepository.Result.Loading -> {
-                                // Keep loading state
                             }
                         }
                     }
@@ -227,15 +224,15 @@ class AuthViewModel @Inject constructor(
     
     private fun validateRegistrationInput(user: User, password: String): Boolean {
         return when {
-            user.name.isEmpty() -> {
+            user.name?.isEmpty() != false -> {
                 _error.value = "Name is required"
                 false
             }
-            user.email.isEmpty() -> {
+            user.email?.isEmpty() != false -> {
                 _error.value = "Email is required"
                 false
             }
-            !android.util.Patterns.EMAIL_ADDRESS.matcher(user.email).matches() -> {
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(user.email ?: "").matches() -> {
                 _error.value = "Invalid email format"
                 false
             }
@@ -247,7 +244,7 @@ class AuthViewModel @Inject constructor(
                 _error.value = "Password must be at least 6 characters"
                 false
             }
-            user.bloodgroup.isEmpty() -> {
+            user.bloodGroup?.isEmpty() != false -> {
                 _error.value = "Blood group is required"
                 false
             }

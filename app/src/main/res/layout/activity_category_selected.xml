@@ -35,4 +35,12 @@
         android:visibility="gone"
         android:textColor="#990f10" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/continueButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="Continue"
+        android:backgroundTint="#990f10"/>
+
 </LinearLayout>
