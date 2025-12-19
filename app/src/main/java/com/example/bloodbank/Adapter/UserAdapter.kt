@@ -46,7 +46,7 @@ class UserAdapter(private var users: List<User> = emptyList()) :
         
         fun bind(user: User) {
             nameText.text = user.name
-            bloodGroupText.text = user.bloodgroup
+            bloodGroupText.text = user.bloodGroup
             addressText.text = user.address
             
             // Load profile image if available
