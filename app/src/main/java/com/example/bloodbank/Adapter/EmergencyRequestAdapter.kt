@@ -39,11 +39,11 @@ class EmergencyRequestAdapter(private var requests: List<EmergencyRequest> = emp
     }
     
     inner class EmergencyRequestViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val cardView: MaterialCardView = itemView.findViewById(R.id.cardView)
-        private val patientNameText: TextView = itemView.findViewById(R.id.patientNameText)
-        private val bloodGroupText: TextView = itemView.findViewById(R.id.bloodGroupText)
-        private val hospitalText: TextView = itemView.findViewById(R.id.hospitalText)
-        private val urgencyText: TextView = itemView.findViewById(R.id.urgencyText)
+        private val cardView: MaterialCardView = itemView.findViewById(R.id.emergency_request_card)
+        private val patientNameText: TextView = itemView.findViewById(R.id.patient_name)
+        private val bloodGroupText: TextView = itemView.findViewById(R.id.blood_group)
+        private val hospitalText: TextView = itemView.findViewById(R.id.hospital_name)
+        private val urgencyText: TextView = itemView.findViewById(R.id.priority_level)
         
         fun bind(request: EmergencyRequest) {
             patientNameText.text = request.patientName
