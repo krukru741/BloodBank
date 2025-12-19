@@ -7,6 +7,7 @@ data class DonationAppointment(
     var appointmentId: String? = null,
     var donorId: String? = null,
     var centerId: String? = null,
+    var centerName: String? = null,
     var appointmentDate: Long = 0L,
     var timeSlot: String? = null,
     var status: String? = null, // SCHEDULED, COMPLETED, CANCELLED

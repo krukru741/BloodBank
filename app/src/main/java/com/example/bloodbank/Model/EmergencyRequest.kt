@@ -7,6 +7,7 @@ data class EmergencyRequest(
     var hospitalName: String? = null,
     var hospitalAddress: String? = null,
     var contactNumber: String? = null,
+    var urgencyLevel: String? = null,
     var requiredDate: String? = null,
     var description: String? = null,
     var requesterId: String? = null,
@@ -15,4 +16,8 @@ data class EmergencyRequest(
     var responses: Map<String, Boolean>? = null,
     var latitude: Double = 0.0,
     var longitude: Double = 0.0
-)
+) {
+    // Alias for backward compatibility
+    val hospital: String?
+        get() = hospitalName
+}
