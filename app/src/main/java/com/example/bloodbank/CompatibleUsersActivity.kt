@@ -28,7 +28,7 @@ class CompatibleUsersActivity : AppCompatActivity() {
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_compatible_users)
+        setContentView(R.layout.activity_main) // Reuse main activity layout temporarily
         
         initializeViews()
         setupToolbar()
@@ -38,7 +38,7 @@ class CompatibleUsersActivity : AppCompatActivity() {
     
     private fun initializeViews() {
         toolbar = findViewById(R.id.toolbar)
-        recyclerView = findViewById(R.id.compatibleUsersRecyclerView)
+        recyclerView = findViewById(R.id.recyclerView) // Use generic recyclerView ID
     }
     
     private fun setupToolbar() {
@@ -92,10 +92,10 @@ class CompatibleUsersActivity : AppCompatActivity() {
                         
                         if (bloodGroup in compatibleBloodGroups) {
                             val user = CompatibleUser(
-                                id = userSnapshot.child("id").getValue(String::class.java) ?: "",
+                                userId = userSnapshot.child("id").getValue(String::class.java) ?: "",
                                 name = userSnapshot.child("name").getValue(String::class.java) ?: "",
-                                bloodgroup = bloodGroup ?: "",
-                                phonenumber = userSnapshot.child("phonenumber").getValue(String::class.java) ?: "",
+                                bloodGroup = bloodGroup ?: "",
+                                phoneNumber = userSnapshot.child("phoneNumber").getValue(String::class.java) ?: "",
                                 address = userSnapshot.child("address").getValue(String::class.java) ?: ""
                             )
                             usersList.add(user)
