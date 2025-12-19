@@ -19,8 +19,7 @@
             android:id="@+id/badgeIcon"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:contentDescription="Badge icon"
-            android:src="@drawable/ic_badge_default"/>
+            android:contentDescription="Badge icon"/>
 
         <TextView
             android:id="@+id/badgeNameText"
