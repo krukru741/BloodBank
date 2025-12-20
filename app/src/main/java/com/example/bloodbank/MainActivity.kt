@@ -210,15 +210,21 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     }
 
     private fun showDonorInfo() {
-        additionalInfoSection.visibility = View.VISIBLE
-        donorInfo.visibility = View.VISIBLE
-        recipientInfo.visibility = View.GONE
+        // Only update UI if navigation header has been initialized
+        if (::additionalInfoSection.isInitialized) {
+            additionalInfoSection.visibility = View.VISIBLE
+            donorInfo.visibility = View.VISIBLE
+            recipientInfo.visibility = View.GONE
+        }
     }
 
     private fun showRecipientInfo() {
-        additionalInfoSection.visibility = View.VISIBLE
-        donorInfo.visibility = View.GONE
-        recipientInfo.visibility = View.VISIBLE
+        // Only update UI if navigation header has been initialized
+        if (::additionalInfoSection.isInitialized) {
+            additionalInfoSection.visibility = View.VISIBLE
+            donorInfo.visibility = View.GONE
+            recipientInfo.visibility = View.VISIBLE
+        }
     }
 
     private fun startEmergencyRequest() {

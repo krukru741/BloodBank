@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.bloodbank.Model.User
 import com.example.bloodbank.R
 import com.example.bloodbank.UserProfileActivity
@@ -49,8 +50,12 @@ class UserAdapter(private var users: List<User> = emptyList()) :
             bloodGroupText.text = user.bloodGroup
             addressText.text = user.address
             
-            // Load profile image if available
-            // Glide or other image loading can be added here
+            // Load profile image with Glide
+            Glide.with(itemView.context)
+                .load(user.profileImagePath)
+                .placeholder(R.drawable.profile)
+                .error(R.drawable.profile)
+                .into(profileImage)
             
             itemView.setOnClickListener {
                 val intent = Intent(itemView.context, UserProfileActivity::class.java).apply {
