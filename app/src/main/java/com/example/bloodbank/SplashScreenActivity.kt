@@ -6,11 +6,13 @@ import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import dagger.hilt.android.AndroidEntryPoint
 
 /**
  * SplashScreenActivity - App entry point with branding.
  * Simple navigation activity, no ViewModel needed.
  */
+@AndroidEntryPoint
 class SplashScreenActivity : AppCompatActivity() {
     
     private val firebaseAuth = FirebaseAuth.getInstance()
