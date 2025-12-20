@@ -2,6 +2,7 @@ package com.example.bloodbank.repository
 
 import com.example.bloodbank.DatabaseHelper
 import com.example.bloodbank.Model.DonationCenter
+import com.example.bloodbank.repository.Result
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -69,7 +70,10 @@ class FirebaseDonationCenterRepository @Inject constructor(
                 trySend(Result.Success(Unit))
                 close() 
             }
-            .addOnFailureListener { trySend(Result.Error(it)); close() }
+            .addOnFailureListener { 
+                trySend(Result.Error(it))
+                close() 
+            }
         awaitClose()
     }
 }
